@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard OUT Oficina - COMEXPORT</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --navy: #1a2a4a;
+  --navy-dark: #0d1a30;
+  --navy-mid: #1e3460;
+  --blue: #2255a4;
+  --blue-light: #3a70c8;
+  --accent: #4a9eed;
+  --accent2: #5bc8f5;
+  --white: #ffffff;
+  --white-dim: rgba(255,255,255,0.85);
+  --white-muted: rgba(255,255,255,0.5);
+  --card-bg: rgba(255,255,255,0.06);
+  --card-border: rgba(255,255,255,0.12);
+  --input-bg: rgba(255,255,255,0.08);
+  --red: #e74c3c;
+  --green: #2ecc71;
+  --yellow: #f39c12;
+  --purple: #9b59b6;
+  --teal: #1abc9c;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Barlow', sans-serif;
+  background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 40%, var(--navy-mid) 100%);
+  min-height: 100vh;
+  color: var(--white);
+  position: relative;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at 20% 50%, rgba(34,85,164,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(74,158,237,0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+.container { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 0 20px 40px; }
+
+/* HEADER */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 0 20px;
+  border-bottom: 1px solid var(--card-border);
+  margin-bottom: 28px;
+  flex-wrap: wrap; gap: 16px;
+}
+.header-left { display: flex; align-items: center; gap: 20px; }
+.logo-wrap { 
+  background: var(--navy-mid);
+  border-radius: 12px; padding: 10px 16px;
+  border: 1px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center;
+}
+.logo-wrap img { height: 44px; display: block; }
+.header-title { }
+.header-title h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: 1px; color: var(--white); line-height: 1; }
+.header-title p { font-size: 12px; color: var(--white-muted); margin-top: 4px; letter-spacing: 2px; text-transform: uppercase; }
+.header-date { font-size: 12px; color: var(--white-muted); text-align: right; }
+
+/* STAT CARDS */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+  cursor: pointer;
+}
+.stat-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.25); }
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  border-radius: 14px 14px 0 0;
+}
+.stat-card.toyota::before { background: linear-gradient(90deg, #e74c3c, #c0392b); }
+.stat-card.vw::before { background: linear-gradient(90deg, #3498db, #2980b9); }
+.stat-card.gm::before { background: linear-gradient(90deg, #f39c12, #d68910); }
+.stat-card.hyundai::before { background: linear-gradient(90deg, #9b59b6, #7d3c98); }
+.stat-card.byd::before { background: linear-gradient(90deg, #1abc9c, #17a589); }
+.stat-card.total::before { background: linear-gradient(90deg, var(--accent), var(--blue-light)); }
+.stat-icon { font-size: 22px; margin-bottom: 8px; }
+.stat-brand { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; color: var(--white-muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+.stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 36px; font-weight: 800; line-height: 1; }
+.stat-label { font-size: 11px; color: var(--white-muted); margin-top: 2px; }
+
+/* TABS */
+.tabs-row { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.tab-btn {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 700; letter-spacing: 1px;
+  padding: 9px 18px; border-radius: 30px;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--white-muted);
+  cursor: pointer; transition: all 0.2s;
+  text-transform: uppercase;
+}
+.tab-btn:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+.tab-btn.active { background: var(--blue); border-color: var(--blue-light); color: var(--white); }
+.tab-btn.toyota.active { background: #c0392b; border-color: #e74c3c; }
+.tab-btn.vw.active { background: #2980b9; border-color: #3498db; }
+.tab-btn.gm.active { background: #d68910; border-color: #f39c12; }
+.tab-btn.hyundai.active { background: #7d3c98; border-color: #9b59b6; }
+.tab-btn.byd.active { background: #17a589; border-color: #1abc9c; }
+
+/* MAIN PANEL */
+.main-panel {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.panel-title { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+.panel-count { font-size: 13px; color: var(--white-muted); background: rgba(255,255,255,0.07); padding: 4px 12px; border-radius: 20px; }
+
+/* SEARCH */
+.search-wrap {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 0;
+}
+.search-input {
+  flex: 1; min-width: 220px;
+  background: var(--input-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 10px 16px;
+  color: var(--white);
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-input::placeholder { color: var(--white-muted); }
+.search-input:focus { border-color: var(--accent); }
+.filter-select {
+  background: var(--input-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--white);
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  min-width: 140px;
+}
+.filter-select option { background: var(--navy); }
+.filter-select:focus { border-color: var(--accent); }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; margin-top: 16px; border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+thead tr { background: rgba(255,255,255,0.05); }
+th {
+  padding: 12px 16px; text-align: left;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 12px;
+  font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--white-muted); border-bottom: 1px solid var(--card-border);
+  white-space: nowrap;
+}
+td { padding: 11px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--white-dim); }
+tr:last-child td { border-bottom: none; }
+tbody tr { transition: background 0.15s; }
+tbody tr:hover { background: rgba(255,255,255,0.05); }
+.chassi-badge {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.5px;
+  color: var(--accent2);
+}
+.brand-badge {
+  display: inline-block; padding: 2px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; font-family: 'Barlow Condensed', sans-serif;
+}
+.brand-toyota { background: rgba(231,76,60,0.2); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
+.brand-vw { background: rgba(52,152,219,0.2); color: #3498db; border: 1px solid rgba(52,152,219,0.3); }
+.brand-gm { background: rgba(243,156,18,0.2); color: #f39c12; border: 1px solid rgba(243,156,18,0.3); }
+.brand-hyundai { background: rgba(155,89,182,0.2); color: #9b59b6; border: 1px solid rgba(155,89,182,0.3); }
+.brand-byd { background: rgba(26,188,156,0.2); color: #1abc9c; border: 1px solid rgba(26,188,156,0.3); }
+.date-cell { color: var(--white-muted); font-size: 13px; }
+.no-results { text-align: center; padding: 40px; color: var(--white-muted); font-style: italic; }
+.pagination { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.page-btn {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  color: var(--white-muted); padding: 6px 14px; border-radius: 8px;
+  cursor: pointer; font-family: 'Barlow', sans-serif; font-size: 13px;
+  transition: all 0.2s;
+}
+.page-btn:hover, .page-btn.active { background: var(--blue); border-color: var(--blue-light); color: var(--white); }
+.page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.page-info { font-size: 12px; color: var(--white-muted); }
+
+/* MODALS / FORMS */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100;
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--navy-mid);
+  border: 1px solid var(--card-border);
+  border-radius: 18px; padding: 30px;
+  max-width: 520px; width: 100%;
+  max-height: 90vh; overflow-y: auto;
+}
+.modal h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 20px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--white-muted); margin-bottom: 6px; }
+.form-group input, .form-group select {
+  width: 100%; background: var(--input-bg);
+  border: 1px solid var(--card-border); border-radius: 10px;
+  padding: 11px 14px; color: var(--white);
+  font-family: 'Barlow', sans-serif; font-size: 14px; outline: none;
+  transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+.form-group select option { background: var(--navy); }
+.form-row { display: flex; gap: 12px; }
+.form-row .form-group { flex: 1; }
+.btn-primary {
+  width: 100%; padding: 13px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--blue), var(--blue-light));
+  border: none; color: var(--white);
+  font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700;
+  letter-spacing: 1px; cursor: pointer; transition: opacity 0.2s;
+  margin-top: 4px;
+}
+.btn-primary:hover { opacity: 0.9; }
+.btn-secondary {
+  padding: 10px 20px; border-radius: 10px;
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  color: var(--white-muted); font-family: 'Barlow', sans-serif;
+  font-size: 14px; cursor: pointer; transition: all 0.2s;
+}
+.btn-secondary:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+.modal-btns { display: flex; gap: 10px; margin-top: 8px; }
+.btn-danger {
+  padding: 10px 20px; border-radius: 10px;
+  background: rgba(231,76,60,0.15); border: 1px solid rgba(231,76,60,0.3);
+  color: #e74c3c; font-family: 'Barlow', sans-serif;
+  font-size: 14px; cursor: pointer; transition: all 0.2s;
+}
+.btn-danger:hover { background: rgba(231,76,60,0.3); }
+
+/* ACTIONS ROW */
+.actions-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+.action-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: 10px;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--white-dim); font-family: 'Barlow', sans-serif;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: all 0.2s; white-space: nowrap;
+}
+.action-btn:hover { border-color: var(--accent); color: var(--white); background: rgba(74,158,237,0.1); }
+.action-btn svg { flex-shrink: 0; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--navy-mid); border: 1px solid var(--accent);
+  border-radius: 12px; padding: 14px 20px;
+  font-size: 14px; z-index: 200;
+  opacity: 0; transform: translateY(10px);
+  transition: all 0.3s; pointer-events: none;
+  max-width: 320px;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.error { border-color: var(--red); }
+.toast.success { border-color: var(--green); }
+
+/* FILE UPLOAD AREA */
+.upload-zone {
+  border: 2px dashed var(--card-border);
+  border-radius: 12px; padding: 28px 20px;
+  text-align: center; cursor: pointer;
+  transition: all 0.2s; margin-bottom: 16px;
+}
+.upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: rgba(74,158,237,0.05); }
+.upload-icon { font-size: 36px; margin-bottom: 10px; }
+.upload-text { font-size: 14px; color: var(--white-muted); }
+.upload-text span { color: var(--accent); cursor: pointer; }
+#file-input { display: none; }
+
+/* ROW ACTIONS */
+.row-del { 
+  background: none; border: none; color: rgba(231,76,60,0.5);
+  cursor: pointer; padding: 4px; border-radius: 6px;
+  transition: color 0.15s; font-size: 16px;
+}
+.row-del:hover { color: var(--red); }
+
+/* CHARTS */
+.charts-section { margin-bottom: 28px; }
+.charts-section-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--white-muted);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
+}
+.charts-section-title::after {
+  content: ''; flex: 1; height: 1px; background: var(--card-border);
+}
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.charts-grid-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+.chart-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+}
+.chart-card.span2 { grid-column: span 2; }
+.chart-card-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--white-muted);
+  margin-bottom: 16px;
+}
+.chart-wrap { position: relative; }
+.chart-wrap canvas { max-height: 240px; }
+.chart-wrap.tall canvas { max-height: 280px; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .charts-grid { grid-template-columns: 1fr 1fr; }
+  .charts-grid-bottom { grid-template-columns: 1fr; }
+  .chart-card.span2 { grid-column: span 1; }
+}
+@media (max-width: 700px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .panel-header { flex-direction: column; align-items: flex-start; }
+  .charts-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div id="app" style="display:none;">
+<div class="container">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-wrap">
+        <img src="data:image/jpeg;base64,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" alt="COMEXPORT">
+      </div>
+      <div class="header-title">
+        <h1>OUT OFICINA — DASHBOARD</h1>
+        <p>Controle de saída de veículos por montadora</p>
+
+<button onclick="logout()" style="
+padding:10px 18px;
+background:#ff4d4f;
+color:white;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+margin-top:10px;
+">
+Sair
+</button>
+
+      </div>
+    </div>
+    <div class="header-date" id="header-date"></div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stats-row" id="stats-row"></div>
+
+  <!-- CHARTS SECTION -->
+  <div class="charts-section" id="charts-section">
+    <div class="charts-section-title">Análise Visual</div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-card-title">🥧 Distribuição por Montadora</div>
+        <div class="chart-wrap"><canvas id="chart-donut"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">📊 Veículos por Montadora</div>
+        <div class="chart-wrap"><canvas id="chart-bar-brands"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">🏆 Top 6 Modelos</div>
+        <div class="chart-wrap"><canvas id="chart-top-models"></canvas></div>
+      </div>
+    </div>
+    <div class="charts-grid-bottom">
+      <div class="chart-card span2">
+        <div class="chart-card-title">📈 OUT por Mês — Evolução Temporal</div>
+        <div class="chart-wrap tall"><canvas id="chart-timeline"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">📅 OUT por Dia da Semana</div>
+        <div class="chart-wrap"><canvas id="chart-weekday"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions-row">
+    <button class="action-btn" onclick="openAddModal()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Adicionar Veículo
+    </button>
+    <button class="action-btn" onclick="openImportModal()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Importar Excel
+</button>
+
+<div style="
+display:flex;
+gap:10px;
+align-items:center;
+flex-wrap:wrap;
+margin-top:25px;
+width:100%;
+">
+<input type="date" id="filtroDataInicio" style="
+padding:10px;
+border-radius:8px;
+border:none;
+">
+
+<input type="date" id="filtroDataFim" style="
+padding:10px;
+border-radius:8px;
+border:none;
+">
+
+<button onclick="applyFilters()" style="
+padding:10px 18px;
+border-radius:8px;
+border:none;
+cursor:pointer;
+font-weight:bold;
+">
+Filtrar Data
+</button>
+
+<button onclick="
+document.getElementById('filtroDataInicio').value='';
+document.getElementById('filtroDataFim').value='';
+applyFilters();
+" style="
+padding:10px 18px;
+border-radius:8px;
+border:none;
+cursor:pointer;
+font-weight:bold;
+background:#ff4d4f;
+color:white;
+">
+Limpar
+</button>
+
+</div>
+    <button class="action-btn" onclick="exportCSV()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Exportar CSV
+    </button>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs-row" id="tabs-row"></div>
+
+  <!-- MAIN PANEL -->
+  <div class="main-panel">
+    <div class="panel-header">
+      <div class="panel-title" id="panel-title">GERAL — TODOS OS VEÍCULOS</div>
+      <div class="panel-count" id="panel-count">0 registros</div>
+    </div>
+    <div class="search-wrap">
+      <input class="search-input" type="text" id="search-input" placeholder="🔍  Buscar por chassi, modelo ou data..." oninput="applyFilters()">
+      <select class="filter-select" id="model-filter" onchange="applyFilters()">
+        <option value="">Todos os modelos</option>
+      </select>
+      <select class="filter-select" id="sort-select" onchange="applyFilters()">
+        <option value="date-desc">Data ↓ (mais recente)</option>
+        <option value="date-asc">Data ↑ (mais antigo)</option>
+        <option value="model-asc">Modelo A-Z</option>
+        <option value="chassi-asc">Chassi A-Z</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Chassi</th>
+            <th>Modelo</th>
+            <th id="brand-col-head">Montadora</th>
+            <th>Data OUT</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <h2>➕ Adicionar Veículo</h2>
+    <div class="form-group">
+      <label>Montadora</label>
+      <select id="add-brand">
+        <option value="TOYOTA">Toyota</option>
+        <option value="VW">Volkswagen</option>
+        <option value="GM">GM / Chevrolet</option>
+        <option value="HYUNDAI">Hyundai</option>
+        <option value="BYD">BYD</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Número do Chassi</label>
+      <input type="text" id="add-chassi" placeholder="Ex: 9BG1481K0TC434442" style="text-transform:uppercase">
+    </div>
+    <div class="form-group">
+      <label>Modelo</label>
+      <input type="text" id="add-modelo" placeholder="Ex: HILUX, POLO, S10...">
+    </div>
+    <div class="form-group">
+      <label>Data de OUT</label>
+      <input type="date" id="add-data">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-primary" onclick="saveVehicle()" style="flex:1">Salvar</button>
+      <button class="btn-secondary" onclick="closeModal('add-modal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal">
+    <h2>📂 Importar Excel</h2>
+    <p style="font-size:13px;color:var(--white-muted);margin-bottom:16px;">Importe um arquivo .xlsx com colunas: <strong>Chassi</strong>, <strong>Modelo</strong>, <strong>Data</strong>. A montadora será selecionada abaixo.</p>
+    <div class="form-group">
+      <label>Montadora destino</label>
+      <select id="import-brand">
+        <option value="TOYOTA">Toyota</option>
+        <option value="VW">Volkswagen</option>
+        <option value="GM">GM / Chevrolet</option>
+        <option value="HYUNDAI">Hyundai</option>
+        <option value="BYD">BYD</option>
+      </select>
+    </div>
+    <div class="upload-zone" onclick="document.getElementById('file-input').click()" id="upload-zone">
+      <div class="upload-icon">📊</div>
+      <div class="upload-text">Arraste o arquivo aqui ou <span>clique para selecionar</span></div>
+      <div style="font-size:12px;color:var(--white-muted);margin-top:6px;">Suporte: .xlsx, .xls, .csv</div>
+    </div>
+    <input type="file" id="file-input" accept=".xlsx,.xls,.csv" onchange="handleFileSelect(this)">
+    <div id="import-preview" style="display:none;margin-bottom:16px;"></div>
+    <div id="import-status" style="font-size:13px;color:var(--white-muted);margin-bottom:12px;"></div>
+    <div class="modal-btns">
+      <button class="btn-primary" onclick="confirmImport()" style="flex:1" id="import-btn">Confirmar Importação</button>
+      <button class="btn-secondary" onclick="closeModal('import-modal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="modal-overlay" id="del-modal">
+  <div class="modal" style="max-width:380px">
+    <h2>🗑️ Confirmar exclusão</h2>
+    <p style="font-size:14px;color:var(--white-muted);margin-bottom:24px;">Deseja remover este veículo do registro?</p>
+    <div id="del-preview" style="background:rgba(255,255,255,0.05);border-radius:10px;padding:14px;margin-bottom:20px;font-size:13px;"></div>
+    <div class="modal-btns">
+      <button class="btn-danger" onclick="confirmDelete()" style="flex:1">Sim, remover</button>
+      <button class="btn-secondary" onclick="closeModal('del-modal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// =========== DATA ===========
+const SEED_DATA = {"TOYOTA":[{"Chassi":"8AJBA3CD3T7978914","Modelo":"HILUX","Data":"2026-01-16"},{"Chassi":"8AJBA3CD4T7978890","Modelo":"HILUX","Data":"2026-01-16"},{"Chassi":"8AJBA3FS2T0408101","Modelo":"SW4","Data":"2026-01-20"},{"Chassi":"8AJBA3CD5T7980289","Modelo":"HILUX","Data":"2026-01-21"},{"Chassi":"8AJBA3CD5T7982785","Modelo":"HILUX","Data":"2026-01-22"},{"Chassi":"8AJBA3CD0T7982886","Modelo":"HILUX","Data":"2026-01-23"},{"Chassi":"8AJBA3CD3T7981067","Modelo":"HILUX","Data":"2026-01-23"},{"Chassi":"8AJBA3CD4T7980476","Modelo":"HILUX","Data":"2026-01-23"},{"Chassi":"8AJBA3CD4T7983605","Modelo":"HILUX","Data":"2026-01-23"},{"Chassi":"8AJBA3CD6T7981807","Modelo":"HILUX","Data":"2026-01-23"},{"Chassi":"8AJBA3CD6T7981872","Modelo":"HILUX","Data":"2026-01-23"},{"Chassi":"8AJBA3CD6T7982813","Modelo":"HILUX","Data":"2026-01-23"},{"Chassi":"8AJBA3FS0T0409733","Modelo":"SW4","Data":"2026-01-23"},{"Chassi":"8AJBA3FSXT0409187","Modelo":"SW4","Data":"2026-01-23"},{"Chassi":"8AJBA3CD2T7981920","Modelo":"HILUX","Data":"2026-02-04"},{"Chassi":"8AJBA3FSXT0408721","Modelo":"SW4","Data":"2026-02-18"},{"Chassi":"9BRBY3BE1T4084461","Modelo":"COROLLA","Data":"2026-02-24"},{"Chassi":"9BRBY3BE2T4084405","Modelo":"COROLLA","Data":"2026-02-25"},{"Chassi":"9BRBY3BE5T4084267","Modelo":"COROLLA","Data":"2026-02-26"},{"Chassi":"8AJBA3FS6T0408117","Modelo":"SW4","Data":"2026-03-11"},{"Chassi":"9BRAD8AF9T3003386","Modelo":"YARIS CROSS","Data":"2026-03-12"},{"Chassi":"9BRB33BE0T2254853","Modelo":"COROLLA","Data":"2026-03-16"},{"Chassi":"9BRBY3BE0T4084340","Modelo":"COROLLA","Data":"2026-03-17"},{"Chassi":"9BRK3AAG1T0233495","Modelo":"CROSS","Data":"2026-03-17"},{"Chassi":"9BRB33BEXT2255329","Modelo":"COROLLA","Data":"2026-03-18"},{"Chassi":"9BRAD8AF0T3004099","Modelo":"YARIS CROSS","Data":"2026-03-20"},{"Chassi":"9BRAD8AF1T3003785","Modelo":"YARIS CROSS","Data":"2026-03-20"},{"Chassi":"9BRAD8AF1T3004239","Modelo":"YARIS CROSS","Data":"2026-03-20"},{"Chassi":"9BRAD8AF9T3003873","Modelo":"YARIS CROSS","Data":"2026-03-20"},{"Chassi":"9BRAD8AF9T3003937","Modelo":"YARIS CROSS","Data":"2026-03-20"},{"Chassi":"9BRK3AAG5T0234164","Modelo":"CROSS","Data":"2026-03-20"},{"Chassi":"9BRK3AAGXT0234225","Modelo":"CROSS","Data":"2026-03-20"},{"Chassi":"9BRA88BF0T3004767","Modelo":"YARIS CROSS","Data":"2026-03-26"},{"Chassi":"9BRBY3BE2T4086669","Modelo":"COROLLA","Data":"2026-03-26"},{"Chassi":"9BRAD8AF8T3004268","Modelo":"YARIS CROSS","Data":"2026-03-27"},{"Chassi":"9BRB33BE9T2257346","Modelo":"COROLLA","Data":"2026-03-27"},{"Chassi":"9BRK3AAG2T0233876","Modelo":"CROSS","Data":"2026-03-31"},{"Chassi":"8AJBA3CD0T7987358","Modelo":"HILUX","Data":"2026-04-10"},{"Chassi":"8AJBA3CD2T7987667","Modelo":"HILUX","Data":"2026-04-10"},{"Chassi":"8AJBA3CD2T7988012","Modelo":"HILUX","Data":"2026-04-10"},{"Chassi":"8AJBA3CD9T7988282","Modelo":"HILUX","Data":"2026-04-10"},{"Chassi":"9BRA88BF1T3004664","Modelo":"YARIS CROSS","Data":"2026-04-10"},{"Chassi":"8AJBA3FS1T0413354","Modelo":"SW4","Data":"2026-04-11"},{"Chassi":"9BRA88BF3T3004827","Modelo":"YARIS CROSS","Data":"2026-04-11"},{"Chassi":"9BRA88BF9T3004590","Modelo":"YARIS CROSS","Data":"2026-04-11"},{"Chassi":"9BRAD8AF6T3004205","Modelo":"YARIS CROSS","Data":"2026-04-11"},{"Chassi":"8AJBA3CD3T7987435","Modelo":"HILUX","Data":"2026-04-13"},{"Chassi":"9BRBY3BE6T4089395","Modelo":"COROLLA","Data":"2026-04-13"},{"Chassi":"9BRAD8AF2T3003827","Modelo":"YARIS CROSS","Data":"2026-04-14"},{"Chassi":"8AJBA3CD6T7989731","Modelo":"HILUX","Data":"2026-04-15"},{"Chassi":"8AJBA3FS2T0413394","Modelo":"SW4","Data":"2026-04-16"},{"Chassi":"9BRAD8AF7T3004472","Modelo":"YARIS CROSS","Data":"2026-04-16"},{"Chassi":"8AJBA3CD3T7987810","Modelo":"HILUX","Data":"2026-04-17"},{"Chassi":"8AJBA3FS2T0412651","Modelo":"SW4","Data":"2026-04-17"},{"Chassi":"8AJBA3FSXT0412560","Modelo":"SW4","Data":"2026-04-17"},{"Chassi":"8AJDA8CB6T8104944","Modelo":"HILUX IMV","Data":"2026-04-17"},{"Chassi":"9BRA88BF7T3007102","Modelo":"YARIS CROSS","Data":"2026-04-17"},{"Chassi":"9BRAD8AF5T3007225","Modelo":"YARIS CROSS","Data":"2026-04-17"},{"Chassi":"9BRAD8AF6T3008223","Modelo":"YARIS CROSS","Data":"2026-04-17"},{"Chassi":"9BRK3AAG5T0237372","Modelo":"CROSS","Data":"2026-04-17"},{"Chassi":"9BRAD8AF1T3008274","Modelo":"YARIS CROSS","Data":"2026-04-18"},{"Chassi":"8AJBA3CD3T7990111","Modelo":"HILUX","Data":"2026-04-20"},{"Chassi":"9BRA88BF8T3007111","Modelo":"YARIS CROSS","Data":"2026-04-20"},{"Chassi":"9BRB33BEXT2258683","Modelo":"COROLLA","Data":"2026-04-20"},{"Chassi":"9BRK3AAG0T0237828","Modelo":"CROSS","Data":"2026-04-20"},{"Chassi":"9BRK3AAG4T0237458","Modelo":"CROSS","Data":"2026-04-20"},{"Chassi":"9BRK3AAGXT0233382","Modelo":"CROSS","Data":"2026-04-20"},{"Chassi":"9BRKYAAG7T0765870","Modelo":"CROSS","Data":"2026-04-20"},{"Chassi":"9BRAD8AF4T3004221","Modelo":"YARIS CROSS","Data":"2026-04-22"},{"Chassi":"8AJBA3FS2T0414108","Modelo":"SW4","Data":"2026-04-23"},{"Chassi":"8AJBA3FS7T0414282","Modelo":"SW4","Data":"2026-04-23"},{"Chassi":"9BRA88BF4T3007283","Modelo":"YARIS CROSS","Data":"2026-04-23"},{"Chassi":"9BRA88BF6T3007561","Modelo":"YARIS CROSS","Data":"2026-04-23"},{"Chassi":"9BRA88BFXT3007207","Modelo":"YARIS CROSS","Data":"2026-04-23"},{"Chassi":"9BRAD8AF0T3008802","Modelo":"YARIS CROSS","Data":"2026-04-23"},{"Chassi":"9BRAD8AF1T3008310","Modelo":"YARIS CROSS","Data":"2026-04-23"},{"Chassi":"9BRAD8AF8T3008062","Modelo":"YARIS CROSS","Data":"2026-04-23"},{"Chassi":"9BRAD8AFXT3008287","Modelo":"YARIS CROSS","Data":"2026-04-23"},{"Chassi":"9BRK3AAGXT0233124","Modelo":"CROSS","Data":"2026-04-23"},{"Chassi":"9BRK3AAGXT0237738","Modelo":"CROSS","Data":"2026-04-23"},{"Chassi":"9BRKYAAG2T0766084","Modelo":"CROSS","Data":"2026-04-23"},{"Chassi":"9BRAD8AF0T3009058","Modelo":"YARIS CROSS","Data":"2026-04-24"},{"Chassi":"9BRA88BF7T3006743","Modelo":"YARIS CROSS","Data":"2026-04-27"},{"Chassi":"9BRAD8AF2T3008896","Modelo":"YARIS CROSS","Data":"2026-04-27"},{"Chassi":"8AJBA3CD5T7990806","Modelo":"HILUX","Data":"2026-04-29"},{"Chassi":"8AJBA3FS2T0413234","Modelo":"SW4","Data":"2026-04-29"},{"Chassi":"9BRA88BF9T3007165","Modelo":"YARIS CROSS","Data":"2026-04-29"},{"Chassi":"9BRAD8AF8T3008496","Modelo":"YARIS CROSS","Data":"2026-04-29"},{"Chassi":"9BRKYAAG0T0766746","Modelo":"CROSS","Data":"2026-04-29"},{"Chassi":"9BRKYAAG1T0766089","Modelo":"CROSS","Data":"2026-04-29"},{"Chassi":"9BRBY3BE3T4089676","Modelo":"COROLLA","Data":"2026-04-30"},{"Chassi":"9BRK3AAG5T0237808","Modelo":"CROSS","Data":"2026-04-30"},{"Chassi":"9BRK3AAG6T0237350","Modelo":"CROSS","Data":"2026-04-30"},{"Chassi":"9BRAD8AF9T3008300","Modelo":"YARIS CROSS","Data":"2026-05-04"},{"Chassi":"8AJBA3CD8T7992498","Modelo":"HILUX","Data":"2026-05-05"},{"Chassi":"8AJBA3CD9T7992364","Modelo":"HILUX","Data":"2026-05-05"},{"Chassi":"9BRA88BF2T3006973","Modelo":"YARIS CROSS","Data":"2026-05-06"},{"Chassi":"8AJBA3FS2T0413816","Modelo":"SW4","Data":"2026-05-08"},{"Chassi":"9BRB33BE1T2258670","Modelo":"COROLLA","Data":"2026-05-08"}],"VW":[{"Chassi":"9BWAG5R10TP043991","Modelo":"POLO","Data":"2026-03-26"},{"Chassi":"9BWAG5R10TP045577","Modelo":"POLO","Data":"2026-04-02"},{"Chassi":"9BWAG5R11TP048102","Modelo":"POLO","Data":"2026-04-29"},{"Chassi":"9BWAG5R11TT023837","Modelo":"POLO","Data":"2026-05-06"},{"Chassi":"9BWAG5R11TT030755","Modelo":"POLO","Data":"2026-04-02"},{"Chassi":"9BWAG5R11TT034966","Modelo":"POLO","Data":"2026-04-02"},{"Chassi":"9BWAG5R12TP043782","Modelo":"POLO","Data":"2026-03-26"},{"Chassi":"9BWAG5R12TP048819","Modelo":"POLO","Data":"2026-05-07"},{"Chassi":"9BWAG5R13TT027758","Modelo":"POLO","Data":"2026-01-30"},{"Chassi":"9BWAG5R13TT027968","Modelo":"POLO","Data":"2026-01-30"},{"Chassi":"9BWAG5R14TP046537","Modelo":"POLO","Data":"2026-04-11"},{"Chassi":"9BWAG5R14TT027686","Modelo":"POLO","Data":"2026-01-30"},{"Chassi":"9BWAG5R15TT034744","Modelo":"POLO","Data":"2026-01-30"},{"Chassi":"9BWAG5R16TP045552","Modelo":"POLO","Data":"2026-04-09"},{"Chassi":"9BWAG5R16TP045566","Modelo":"POLO","Data":"2026-04-13"},{"Chassi":"9BWAG5R16TP048581","Modelo":"POLO","Data":"2026-04-07"},{"Chassi":"9BWAG5R16TT033697","Modelo":"POLO","Data":"2026-04-11"},{"Chassi":"9BWAG5R17TP043597","Modelo":"POLO","Data":"2026-04-29"},{"Chassi":"9BWAG5R17TP045012","Modelo":"POLO","Data":"2026-05-06"},{"Chassi":"9BWAG5R17TT030002","Modelo":"POLO","Data":"2026-03-24"},{"Chassi":"9BWAG5R18TP040627","Modelo":"POLO","Data":"2026-03-26"},{"Chassi":"9BWAG5R18TP046069","Modelo":"POLO","Data":"2026-02-12"},{"Chassi":"9BWAG5R18TP047979","Modelo":"POLO","Data":"2026-03-26"},{"Chassi":"9BWAG5R18TT033555","Modelo":"POLO","Data":"2026-04-02"},{"Chassi":"9BWAG5R19TP040152","Modelo":"POLO","Data":"2026-04-22"},{"Chassi":"9BWAG5R19TP044945","Modelo":"POLO","Data":"2026-03-20"},{"Chassi":"9BWAG5R19TT034648","Modelo":"POLO","Data":"2026-02-10"},{"Chassi":"9BWAG5R1XTP045277","Modelo":"POLO","Data":"2026-04-09"},{"Chassi":"9BWAG5R1XTT030592","Modelo":"POLO","Data":"2026-04-16"},{"Chassi":"9BWAH5BZ0TT654477","Modelo":"POLO","Data":"2026-03-26"},{"Chassi":"9BWAH5BZ0TT659033","Modelo":"POLO","Data":"2026-02-23"},{"Chassi":"9BWAH5BZ1TT660014","Modelo":"POLO","Data":"2026-02-25"},{"Chassi":"9BWAH5BZ3TT656448","Modelo":"POLO","Data":"2026-03-31"},{"Chassi":"9BWAH5BZ3TT660094","Modelo":"POLO","Data":"2026-04-11"},{"Chassi":"9BWAH5BZ4TT648990","Modelo":"POLO","Data":"2026-03-26"},{"Chassi":"9BWAH5BZ5TT649341","Modelo":"POLO","Data":"2026-04-22"},{"Chassi":"9BWAH5BZ5TT659660","Modelo":"POLO","Data":"2026-01-30"},{"Chassi":"9BWAH5BZ5TT659853","Modelo":"POLO","Data":"2026-01-29"},{"Chassi":"9BWAH5BZ6TT651518","Modelo":"POLO","Data":"2026-04-18"},{"Chassi":"9BWAH5BZ7TT649373","Modelo":"POLO","Data":"2026-05-07"},{"Chassi":"9BWAH5BZ7TT658526","Modelo":"POLO","Data":"2026-03-25"},{"Chassi":"9BWAH5BZXTT654731","Modelo":"POLO","Data":"2026-01-29"},{"Chassi":"9BWAH5BZXTT658245","Modelo":"POLO","Data":"2026-03-26"},{"Chassi":"9BWBG6DF2TT379193","Modelo":"TERA","Data":"2026-02-27"},{"Chassi":"9BWBG6DF2TT396009","Modelo":"TERA","Data":"2026-04-10"},{"Chassi":"9BWBG6DF3TT379851","Modelo":"TERA","Data":"2026-01-21"},{"Chassi":"9BWBG6DF3TT396116","Modelo":"TERA","Data":"2026-03-25"},{"Chassi":"9BWBG6DF4TT396139","Modelo":"TERA","Data":"2026-01-21"},{"Chassi":"9BWBG6DF5TT394867","Modelo":"TERA","Data":"2026-03-11"},{"Chassi":"9BWBG6DF5TT395680","Modelo":"TERA","Data":"2026-05-07"},{"Chassi":"9BWBG6DF6TT395140","Modelo":"TERA","Data":"2026-04-09"},{"Chassi":"9BWBG6DF6TT395414","Modelo":"TERA","Data":"2026-04-07"},{"Chassi":"9BWBG6DF8TT395608","Modelo":"TERA","Data":"2026-03-25"},{"Chassi":"9BWBG6DF9TT379899","Modelo":"TERA","Data":"2026-03-03"},{"Chassi":"9BWBG6DF9TT395116","Modelo":"TERA","Data":"2026-03-03"},{"Chassi":"9BWBG6DFXTT380155","Modelo":"TERA","Data":"2026-01-21"},{"Chassi":"9BWBG6DFXTT394959","Modelo":"TERA","Data":"2026-04-02"},{"Chassi":"9BWBG6DFXTT396596","Modelo":"TERA","Data":"2026-01-23"},{"Chassi":"9BWBG6DFXTT406818","Modelo":"TERA","Data":"2026-03-25"},{"Chassi":"9BWBH6BF1T4097427","Modelo":"T-CROSS","Data":"2026-03-11"},{"Chassi":"9BWBH6BF1T4099856","Modelo":"T-CROSS","Data":"2026-04-29"},{"Chassi":"9BWBH6BF2T4103686","Modelo":"T-CROSS","Data":"2026-03-24"},{"Chassi":"9BWBH6BF3T4104491","Modelo":"T-CROSS","Data":"2026-03-27"},{"Chassi":"9BWBH6BF4T4110171","Modelo":"T-CROSS","Data":"2026-04-28"},{"Chassi":"9BWBH6BF5T4097964","Modelo":"T-CROSS","Data":"2026-04-11"},{"Chassi":"9BWBH6BF5T4101284","Modelo":"T-CROSS","Data":"2026-04-22"},{"Chassi":"9BWBH6BF5T4108557","Modelo":"T-CROSS","Data":"2026-03-18"},{"Chassi":"9BWBH6BF5T4110101","Modelo":"T-CROSS","Data":"2026-04-10"},{"Chassi":"9BWBH6BF6T4100337","Modelo":"T-CROSS","Data":"2026-04-22"},{"Chassi":"9BWBH6BF7T4100430","Modelo":"T-CROSS","Data":"2026-04-22"},{"Chassi":"9BWBH6DF0TT392277","Modelo":"TERA","Data":"2026-04-02"},{"Chassi":"9BWBH6DF0TT394160","Modelo":"TERA","Data":"2026-03-30"},{"Chassi":"9BWBH6DF0TT405514","Modelo":"TERA","Data":"2026-02-25"},{"Chassi":"9BWBH6DF1TT396984","Modelo":"TERA","Data":"2026-02-26"},{"Chassi":"9BWBH6DF2TT392197","Modelo":"TERA","Data":"2026-03-31"},{"Chassi":"9BWBH6DF2TT418412","Modelo":"TERA","Data":"2026-03-17"},{"Chassi":"9BWBH6DF3TT408634","Modelo":"TERA","Data":"2026-03-03"},{"Chassi":"9BWBH6DF4TT406178","Modelo":"TERA","Data":"2026-05-06"},{"Chassi":"9BWBH6DF6TT404626","Modelo":"TERA","Data":"2026-04-11"},{"Chassi":"9BWBH6DF6TT409812","Modelo":"TERA","Data":"2026-04-02"},{"Chassi":"9BWBH6DF7TT393748","Modelo":"TERA","Data":"2026-04-02"},{"Chassi":"9BWBH6DF8TT404126","Modelo":"TERA","Data":"2026-04-28"},{"Chassi":"9BWCH6CH0TP055656","Modelo":"NIVUS","Data":"2026-02-26"},{"Chassi":"9BWCH6CH1TP067119","Modelo":"NIVUS","Data":"2026-04-02"},{"Chassi":"9BWCH6CH1VP003164","Modelo":"NIVUS","Data":"2026-02-18"},{"Chassi":"9BWCH6CH2TP056310","Modelo":"NIVUS","Data":"2026-04-10"},{"Chassi":"9BWCH6CH3TP057546","Modelo":"NIVUS","Data":"2026-05-05"},{"Chassi":"9BWCH6CH3TP058020","Modelo":"NIVUS","Data":"2026-03-24"},{"Chassi":"9BWCH6CH4TP067163","Modelo":"NIVUS","Data":"2026-02-27"},{"Chassi":"9BWCH6CH5TP058052","Modelo":"NIVUS","Data":"2026-03-04"},{"Chassi":"9BWCH6CH5VP001997","Modelo":"NIVUS","Data":"2026-05-05"},{"Chassi":"9BWCH6CH6TP059419","Modelo":"NIVUS","Data":"2026-05-07"},{"Chassi":"9BWCH6CH6TP061784","Modelo":"NIVUS","Data":"2026-03-03"},{"Chassi":"9BWCH6CH6VP000101","Modelo":"NIVUS","Data":"2026-05-05"},{"Chassi":"9BWCH6CH6VP002849","Modelo":"NIVUS","Data":"2026-03-23"},{"Chassi":"9BWCH6CH6VP003905","Modelo":"NIVUS","Data":"2026-03-24"},{"Chassi":"9BWCH6CH7TP066766","Modelo":"NIVUS","Data":"2026-04-17"},{"Chassi":"9BWCH6CH7VP002214","Modelo":"NIVUS","Data":"2026-04-29"},{"Chassi":"9BWCH6CH8TP061818","Modelo":"NIVUS","Data":"2026-05-06"},{"Chassi":"9BWCH6CH8VP000049","Modelo":"NIVUS","Data":"2026-04-24"},{"Chassi":"9BWCH6CH9TP053467","Modelo":"NIVUS","Data":"2026-05-05"},{"Chassi":"9BWCH6CH9TP062010","Modelo":"NIVUS","Data":"2026-03-25"},{"Chassi":"9BWCH6CHXTP059603","Modelo":"NIVUS","Data":"2026-03-25"},{"Chassi":"9BWCH6CHXTP066017","Modelo":"NIVUS","Data":"2026-05-08"},{"Chassi":"9BWDH6BZ0T4024987","Modelo":"VIRTUS","Data":"2026-02-11"},{"Chassi":"9BWDH6BZ0T4025038","Modelo":"VIRTUS","Data":"2026-03-24"},{"Chassi":"9BWDH6BZ1T4026862","Modelo":"VIRTUS","Data":"2026-03-11"},{"Chassi":"9BWDH6BZ3T4024644","Modelo":"VIRTUS","Data":"2026-04-24"},{"Chassi":"9BWDH6BZ4T4025348","Modelo":"VIRTUS","Data":"2026-04-23"},{"Chassi":"9BWDH6BZ6T4024444","Modelo":"VIRTUS","Data":"2026-02-27"},{"Chassi":"9BWDH6BZ9T4025197","Modelo":"VIRTUS","Data":"2026-02-18"},{"Chassi":"9BWDH6BZXT4030263","Modelo":"VIRTUS","Data":"2026-04-18"},{"Chassi":"9BWDJ6BZ9T4030209","Modelo":"VIRTUS","Data":"2026-04-17"}],"GM":[{"Chassi":"9BG1481K0TC434442","Modelo":"S10 WORK TRUCK","Data":"2026-01-05"},{"Chassi":"9BG1481K0TC436091","Modelo":"S10 WORK TRUCK","Data":"2026-01-06"},{"Chassi":"9BG1481K0TC438271","Modelo":"S10 WORK TRUCK","Data":"2026-01-06"},{"Chassi":"9BG148MK0TC437442","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-01-07"},{"Chassi":"9BG1481K0TC437501","Modelo":"S10 WORK TRUCK","Data":"2026-01-07"},{"Chassi":"9BG1481K0TC438072","Modelo":"S10 Work Truck 2","Data":"2026-01-07"},{"Chassi":"9BG148PK0TC437673","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-01-08"},{"Chassi":"9BG148MK0TC430733","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-01-08"},{"Chassi":"9BG1481K0TC437283","Modelo":"S10 WORK TRUCK","Data":"2026-01-08"},{"Chassi":"9BG1481K0TC438036","Modelo":"S10 Work Truck 2","Data":"2026-01-08"},{"Chassi":"9BG148MK0TC430205","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-01-09"},{"Chassi":"9BG148MK0TC433954","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-01-09"},{"Chassi":"9BG1481K0TC436054","Modelo":"S10 WORK TRUCK","Data":"2026-01-12"},{"Chassi":"9BG148MK0TC437759","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-01-13"},{"Chassi":"9BG148MK0TC438174","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-01-13"},{"Chassi":"9BG1481K0TC438086","Modelo":"S10 Work Truck 2","Data":"2026-01-13"},{"Chassi":"9BG148MK0TC437903","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-01-14"},{"Chassi":"9BG1481K0TC437496","Modelo":"S10 WORK TRUCK","Data":"2026-01-14"},{"Chassi":"9BG1481K0TC433946","Modelo":"S10 Work Truck 2","Data":"2026-01-14"},{"Chassi":"9BG148PK0TC436720","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-01-20"},{"Chassi":"9BG148MK0TC410705","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-01-27"},{"Chassi":"9BG148PK0TC438561","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-01-28"},{"Chassi":"9BG148MK0TC438133","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-01-29"},{"Chassi":"9BG148MK0TC439156","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-01-29"},{"Chassi":"9BG1481K0TC438043","Modelo":"S10 Work Truck 2","Data":"2026-01-29"},{"Chassi":"9BG148PK0TC438568","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-02-03"},{"Chassi":"9bg148pk0tc439237","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-02-03"},{"Chassi":"9BG148MK0TC439138","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-03"},{"Chassi":"9BG148MK0TC439158","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-03"},{"Chassi":"9BG1481K0TC439503","Modelo":"S10 Work Truck 2","Data":"2026-02-03"},{"Chassi":"9BG1481K0TC439512","Modelo":"S10 Work Truck 2","Data":"2026-02-03"},{"Chassi":"9BG1481K0TC439725","Modelo":"S10 Work Truck 2","Data":"2026-02-03"},{"Chassi":"9BG148ZK0TC439597","Modelo":"S10 Z71","Data":"2026-02-03"},{"Chassi":"9BG148PK0TC439450","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-02-04"},{"Chassi":"9BG148PK0TC439746","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-02-04"},{"Chassi":"9BG148MK0TC439162","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-04"},{"Chassi":"9BG1481K0TC438078","Modelo":"S10 Work Truck 2","Data":"2026-02-04"},{"Chassi":"9BG1481K0TC439522","Modelo":"S10 Work Truck 2","Data":"2026-02-04"},{"Chassi":"9BG1481K0TC439814","Modelo":"S10 Work Truck 2","Data":"2026-02-04"},{"Chassi":"9BG1481K0TC439817","Modelo":"S10 Work Truck 2","Data":"2026-02-04"},{"Chassi":"9BG1481K0TC439915","Modelo":"S10 Work Truck 2","Data":"2026-02-04"},{"Chassi":"9BG148PK0TC439460","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-02-05"},{"Chassi":"9BG148PK0TC439926","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-02-05"},{"Chassi":"9BG148MK0TC438981","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-05"},{"Chassi":"9BG148MK0TC439376","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-05"},{"Chassi":"9BG148MK0TC440458","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-05"},{"Chassi":"9BG1481K0TC439559","Modelo":"S10 Work Truck 2","Data":"2026-02-05"},{"Chassi":"9BG1481K0TC439818","Modelo":"S10 Work Truck 2","Data":"2026-02-05"},{"Chassi":"9BG148PK0TC439513","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-02-06"},{"Chassi":"9BG1481K0TC439902","Modelo":"S10 Work Truck 2","Data":"2026-02-06"},{"Chassi":"9BG1481K0TC439920","Modelo":"S10 Work Truck 2","Data":"2026-02-06"},{"Chassi":"9BG1481K0TC440023","Modelo":"S10 Work Truck 2","Data":"2026-02-06"},{"Chassi":"9BG148ZK0TC439556","Modelo":"S10 Z71","Data":"2026-02-06"},{"Chassi":"9BG148ZK0TC440134","Modelo":"S10 Z71","Data":"2026-02-06"},{"Chassi":"9BG148PK0TC439937","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-02-09"},{"Chassi":"9BG148MK0TC439599","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-09"},{"Chassi":"9BG1481K0TC440186","Modelo":"S10 Work Truck 2","Data":"2026-02-09"},{"Chassi":"9BG1481K0TC440192","Modelo":"S10 Work Truck 2","Data":"2026-02-09"},{"Chassi":"9BG148PK0TC440382","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-02-10"},{"Chassi":"9BG148MK0TC440502","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-10"},{"Chassi":"9BG148MK0TC440530","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-10"},{"Chassi":"9BG1481K0TC438258","Modelo":"S10 WORK TRUCK","Data":"2026-02-10"},{"Chassi":"9BG1481K0TC440027","Modelo":"S10 Work Truck 2","Data":"2026-02-10"},{"Chassi":"9BG148MK0TC440124","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-11"},{"Chassi":"9BG148MK0TC440468","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-11"},{"Chassi":"9BG1481K0TC440039","Modelo":"S10 Work Truck 2","Data":"2026-02-11"},{"Chassi":"9BG1481K0TC440154","Modelo":"S10 Work Truck 2","Data":"2026-02-11"},{"Chassi":"9BG148ZK0TC439305","Modelo":"S10 Z71","Data":"2026-02-11"},{"Chassi":"9BG148ZK0TC439536","Modelo":"S10 Z71","Data":"2026-02-11"},{"Chassi":"9BG148MK0TC440138","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-12"},{"Chassi":"9BG148MK0TC440391","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-12"},{"Chassi":"9BG1481K0TC439611","Modelo":"S10 Work Truck 2","Data":"2026-02-12"},{"Chassi":"9BG1481K0TC440202","Modelo":"S10 Work Truck 2","Data":"2026-02-12"},{"Chassi":"9BG148MK0TC439815","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-13"},{"Chassi":"9BG148MK0TC440857","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-13"},{"Chassi":"9BG148MK0TC441162","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-13"},{"Chassi":"9BG1481K0TC440959","Modelo":"S10 Work Truck 2","Data":"2026-02-13"},{"Chassi":"9BG1481K0TC437071","Modelo":"S10 WORK TRUCK","Data":"2026-02-18"},{"Chassi":"9BG1481K0TC440185","Modelo":"S10 Work Truck 2","Data":"2026-02-19"},{"Chassi":"9BG1481K0TC441261","Modelo":"S10 Work Truck 2","Data":"2026-02-19"},{"Chassi":"9BG1481K0TC441267","Modelo":"S10 Work Truck 2","Data":"2026-02-19"},{"Chassi":"9BG148PK0TC439756","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-02-20"},{"Chassi":"9BG148MK0TC441619","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-20"},{"Chassi":"9BG148PK0TC440539","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-02-23"},{"Chassi":"9BG1481K0TC441198","Modelo":"S10 Work Truck 2","Data":"2026-02-23"},{"Chassi":"9BG1481K0TC441810","Modelo":"S10 Work Truck 2","Data":"2026-02-23"},{"Chassi":"9BG148PK0TC435518","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-02-24"},{"Chassi":"9BG148MK0TC439313","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-24"},{"Chassi":"9BG148MK0TC440428","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-24"},{"Chassi":"9BG148MK0TC441255","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-24"},{"Chassi":"9BG148MK0TC441403","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-24"},{"Chassi":"9BG148MK0TC442470","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-24"},{"Chassi":"9BG1481K0TC441043","Modelo":"S10 Work Truck 2","Data":"2026-02-24"},{"Chassi":"9BG148PK0TC418247","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-02-25"},{"Chassi":"9BG148MK0TC441352","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-25"},{"Chassi":"9BG148MK0TC441774","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-25"},{"Chassi":"9BG1481K0TC441873","Modelo":"S10 Work Truck 2","Data":"2026-02-25"},{"Chassi":"9BG1481K0TC442745","Modelo":"S10 Work Truck 2","Data":"2026-02-25"},{"Chassi":"9BG1481K0TC442748","Modelo":"S10 Work Truck 2","Data":"2026-02-25"},{"Chassi":"9BG148MK0TC441216","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-26"},{"Chassi":"9BG148MK0TC441433","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-26"},{"Chassi":"9BG148MK0TC441639","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-26"},{"Chassi":"9BG148MK0TC442433","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-26"},{"Chassi":"9BG148MK0TC442656","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-26"},{"Chassi":"9BG148MK0TC440990","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-27"},{"Chassi":"9BG148MK0TC442075","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-27"},{"Chassi":"9BG148MK0TC442224","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-27"},{"Chassi":"9BG148MK0TC442622","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-02-27"},{"Chassi":"9BG1481K0TC439577","Modelo":"S10 Work Truck 2","Data":"2026-02-27"},{"Chassi":"9BG1481K0TC440906","Modelo":"S10 Work Truck 2","Data":"2026-02-27"},{"Chassi":"9BG148PK0TC442114","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-03-02"},{"Chassi":"9BG148PK0TC442828","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-03-02"},{"Chassi":"9BG1481K0TC441645","Modelo":"S10 Work Truck 2","Data":"2026-03-02"},{"Chassi":"9BG148PK0TC443296","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-03-03"},{"Chassi":"9BG148PK0TC434983","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-03-04"},{"Chassi":"9BG148PK0TC442835","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-03-04"},{"Chassi":"9BG148MK0TC443248","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-04"},{"Chassi":"9BG148MK0TC443540","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-05"},{"Chassi":"9BG148MK0TC443993","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-05"},{"Chassi":"9BG148MK0TC442453","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-11"},{"Chassi":"9BG148MK0TC443786","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-11"},{"Chassi":"9BG148PK0TC442131","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-03-12"},{"Chassi":"9BG148MK0TC440566","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-12"},{"Chassi":"9BG148MK0TC444022","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-12"},{"Chassi":"9BG148MK0TC443735","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-13"},{"Chassi":"9BG1481K0TC437041","Modelo":"S10 WORK TRUCK","Data":"2026-03-13"},{"Chassi":"9BG1481K0TC443892","Modelo":"S10 Work Truck 2","Data":"2026-03-13"},{"Chassi":"9BG148PK0TC443637","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-03-16"},{"Chassi":"9BG148MK0TC442142","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-16"},{"Chassi":"9BG148PK0TC440973","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-03-17"},{"Chassi":"9BG148PK0TC441939","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-03-18"},{"Chassi":"9BG148MK0TC443593","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-18"},{"Chassi":"9BG148PK0TC443388","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-03-19"},{"Chassi":"9BG148MK0TC444235","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-19"},{"Chassi":"9BG148MK0TC442639","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-20"},{"Chassi":"9BG148MK0TC443194","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-20"},{"Chassi":"9BG148MK0TC443240","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-20"},{"Chassi":"9BG148MK0TC443728","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-20"},{"Chassi":"9BG148MK0TC443859","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-20"},{"Chassi":"9BG148MK0TC444190","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-20"},{"Chassi":"9BG1481K0TC440871","Modelo":"S10 Work Truck 2","Data":"2026-03-20"},{"Chassi":"9BG1481K0TC441881","Modelo":"S10 Work Truck 2","Data":"2026-03-20"},{"Chassi":"9BG1481K0TC443900","Modelo":"S10 Work Truck 2","Data":"2026-03-20"},{"Chassi":"9BG1481K0TC445890","Modelo":"S10 Work Truck 2","Data":"2026-03-20"},{"Chassi":"9BG148MK0TC443832","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-23"},{"Chassi":"9BG148PK0TC445088","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-03-26"},{"Chassi":"9BG148MK0TC444108","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-26"},{"Chassi":"9BG148MK0TC444780","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-26"},{"Chassi":"9BG1481K0TC441610","Modelo":"S10 Work Truck 2","Data":"2026-03-26"},{"Chassi":"9BG1481K0TC445872","Modelo":"S10 Work Truck 2","Data":"2026-03-26"},{"Chassi":"9BG1481K0TC445937","Modelo":"S10 Work Truck 2","Data":"2026-03-26"},{"Chassi":"9BG1481K0TC444970","Modelo":"S10 Work Truck 2","Data":"2026-03-27"},{"Chassi":"9BG1481K0TC445406","Modelo":"S10 Work Truck 2","Data":"2026-03-27"},{"Chassi":"9BG148PK0TC445309","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-03-28"},{"Chassi":"9BG148PK0TC446689","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-03-28"},{"Chassi":"9BG148MK0TC444695","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-28"},{"Chassi":"9BG1481K0TC443914","Modelo":"S10 Work Truck 2","Data":"2026-03-28"},{"Chassi":"9BG148PK0TC444110","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-03-30"},{"Chassi":"9BG148MK0TC444590","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-30"},{"Chassi":"9BG148MK0TC444665","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-30"},{"Chassi":"9BG1481K0TC443936","Modelo":"S10 Work Truck 2","Data":"2026-03-30"},{"Chassi":"9BG148MK0TC443327","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-03-31"},{"Chassi":"9BG1481K0TC446174","Modelo":"S10 Work Truck 2","Data":"2026-03-31"},{"Chassi":"9BG148PK0TC445302","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-04-01"},{"Chassi":"9BG148PK0TC447473","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-04-01"},{"Chassi":"9BG148MK0TC444835","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-01"},{"Chassi":"9BG148MK0TC445851","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-01"},{"Chassi":"9BG148MK0TC441462","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-02"},{"Chassi":"9BG1481K0TC445107","Modelo":"S10 Work Truck 2","Data":"2026-04-06"},{"Chassi":"9BG148MK0TC445334","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-07"},{"Chassi":"9BG148MK0TC445462","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-07"},{"Chassi":"9BG148MK0TC447327","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-07"},{"Chassi":"9BG1481K0TC445933","Modelo":"S10 Work Truck 2","Data":"2026-04-07"},{"Chassi":"9BG1481K0TC447058","Modelo":"S10 Work Truck 2","Data":"2026-04-07"},{"Chassi":"9BG148MK0TC445464","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-08"},{"Chassi":"9BG148MK0TC445688","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-08"},{"Chassi":"9BG148MK0TC446124","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-08"},{"Chassi":"9BG148MK0TC448335","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-08"},{"Chassi":"9BG1481K0TC445754","Modelo":"S10 Work Truck 2","Data":"2026-04-08"},{"Chassi":"9BG1481K0TC446095","Modelo":"S10 Work Truck 2","Data":"2026-04-08"},{"Chassi":"9BG1481K0TC446337","Modelo":"S10 Work Truck 2","Data":"2026-04-08"},{"Chassi":"9BG1481K0TC446973","Modelo":"S10 Work Truck 2","Data":"2026-04-08"},{"Chassi":"9BG1481K0TC446991","Modelo":"S10 Work Truck 2","Data":"2026-04-08"},{"Chassi":"9BG1481K0TC447364","Modelo":"S10 Work Truck 2","Data":"2026-04-08"},{"Chassi":"9BG148PK0TC447057","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-04-09"},{"Chassi":"9BG148PK0TC447414","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-04-09"},{"Chassi":"9BG148PK0TC447984","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-04-09"},{"Chassi":"9BG148PK0TC448625","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-04-09"},{"Chassi":"9BG148MK0TC445847","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-09"},{"Chassi":"9BG148MK0TC446734","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-09"},{"Chassi":"9BG148MK0TC446854","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-09"},{"Chassi":"9BG1481K0TC446181","Modelo":"S10 Work Truck 2","Data":"2026-04-09"},{"Chassi":"9BG1481K0TC446218","Modelo":"S10 Work Truck 2","Data":"2026-04-09"},{"Chassi":"9BG1481K0TC446837","Modelo":"S10 Work Truck 2","Data":"2026-04-09"},{"Chassi":"9BG1481K0TC444168","Modelo":"S10 Work Truck 2","Data":"2026-04-10"},{"Chassi":"9BG1481K0TC447003","Modelo":"S10 Work Truck 2","Data":"2026-04-10"},{"Chassi":"9BG148PK0TC446875","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-04-11"},{"Chassi":"9BG1481K0TC445868","Modelo":"S10 Work Truck 2","Data":"2026-04-14"},{"Chassi":"9BG148PK0TC447963","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-04-15"},{"Chassi":"9BG148MK0TC443655","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-15"},{"Chassi":"9BG148MK0TC447709","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-15"},{"Chassi":"9BG1481K0TC439679","Modelo":"S10 Work Truck 2","Data":"2026-04-15"},{"Chassi":"9BG1481K0TC447012","Modelo":"S10 Work Truck 2","Data":"2026-04-15"},{"Chassi":"9BG1481K0TC447493","Modelo":"S10 Work Truck 2","Data":"2026-04-15"},{"Chassi":"9BG1481K0TC447817","Modelo":"S10 Work Truck 2","Data":"2026-04-15"},{"Chassi":"9BG1481K0TC448081","Modelo":"S10 Work Truck 2","Data":"2026-04-15"},{"Chassi":"9BG148ZK0TC447517","Modelo":"S10 Z71","Data":"2026-04-15"},{"Chassi":"9BG148PK0TC445271","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-04-16"},{"Chassi":"9BG148PK0TC447760","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-04-16"},{"Chassi":"9BG148MK0TC447526","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-16"},{"Chassi":"9BG1481K0TC446895","Modelo":"S10 Work Truck 2","Data":"2026-04-16"},{"Chassi":"9BG1481K0TC448220","Modelo":"S10 Work Truck 2","Data":"2026-04-17"},{"Chassi":"9BG1481K0TC449151","Modelo":"S10 Work Truck 2","Data":"2026-04-17"},{"Chassi":"9BG148PK0TC447659","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-04-18"},{"Chassi":"9BG148PK0TC448645","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-04-18"},{"Chassi":"9BG148MK0TC446652","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-18"},{"Chassi":"9BG148MK0TC447607","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-18"},{"Chassi":"9BG1481K0TC447005","Modelo":"S10 Work Truck 2","Data":"2026-04-18"},{"Chassi":"9BG1481K0TC447589","Modelo":"S10 Work Truck 2","Data":"2026-04-18"},{"Chassi":"9BG1481K0TC447604","Modelo":"S10 Work Truck 2","Data":"2026-04-18"},{"Chassi":"9BG1481K0TC447663","Modelo":"S10 Work Truck 2","Data":"2026-04-18"},{"Chassi":"9BG1481K0TC448194","Modelo":"S10 Work Truck 2","Data":"2026-04-18"},{"Chassi":"9BG1481K0TC449013","Modelo":"S10 Work Truck 2","Data":"2026-04-18"},{"Chassi":"9BG148PK0TC448034","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-04-23"},{"Chassi":"9BG148PK0TC448656","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-04-23"},{"Chassi":"9BG148MK0TC447417","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-23"},{"Chassi":"9BG1481K0TC442741","Modelo":"S10 Work Truck 2","Data":"2026-04-23"},{"Chassi":"9BG1481K0TC447437","Modelo":"S10 Work Truck 2","Data":"2026-04-23"},{"Chassi":"9BG148PK0TC446915","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-04-24"},{"Chassi":"9BG148PK0TC448184","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-04-24"},{"Chassi":"9BG148MK0TC449150","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-24"},{"Chassi":"9BG1481K0TC448935","Modelo":"S10 Work Truck 2","Data":"2026-04-24"},{"Chassi":"9BG148MK0TC448914","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-27"},{"Chassi":"9BG1481K0TC446969","Modelo":"S10 Work Truck 2","Data":"2026-04-27"},{"Chassi":"9BG1481K0TC448136","Modelo":"S10 Work Truck 2","Data":"2026-04-27"},{"Chassi":"9BG1481K0TC449146","Modelo":"S10 Work Truck 2","Data":"2026-04-27"},{"Chassi":"9BG1481K0TC449988","Modelo":"S10 Work Truck 2","Data":"2026-04-27"},{"Chassi":"9BG1481K0TC449191","Modelo":"S10 Work Truck 2","Data":"2026-04-28"},{"Chassi":"9BG1481K0TC449765","Modelo":"S10 Work Truck 2","Data":"2026-04-28"},{"Chassi":"9BG1481K0TC449793","Modelo":"S10 Work Truck 2","Data":"2026-04-28"},{"Chassi":"9BG148MK0TC448809","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-29"},{"Chassi":"9BG148MK0TC449455","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-29"},{"Chassi":"9BG1481K0TC448180","Modelo":"S10 Work Truck 2","Data":"2026-04-29"},{"Chassi":"9BG148MK0TC449188","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-04-30"},{"Chassi":"9BG1481K0TC449168","Modelo":"S10 Work Truck 2","Data":"2026-04-30"},{"Chassi":"9BG148MK0TC449186","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-02"},{"Chassi":"9BG1481K0TC445071","Modelo":"S10 Work Truck 2","Data":"2026-05-02"},{"Chassi":"9BG1481K0TC449035","Modelo":"S10 Work Truck 2","Data":"2026-05-02"},{"Chassi":"9BG1481K0TC450118","Modelo":"S10 Work Truck 2","Data":"2026-05-02"},{"Chassi":"9BG148PK0TC449503","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-05-04"},{"Chassi":"9BG148PK0TC448991","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-05-05"},{"Chassi":"9BG148MK0TC447464","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-05"},{"Chassi":"9BG148MK0TC449389","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-05"},{"Chassi":"9BG148MK0TC449887","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-05"},{"Chassi":"9BG148MK0TC448692","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-06"},{"Chassi":"9BG148MK0TC449990","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-06"},{"Chassi":"9BG148MK0TC450062","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-06"},{"Chassi":"9BG148MK0TC450295","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-06"},{"Chassi":"9BG148MK0VC400132","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-06"},{"Chassi":"9BG148MK0VC400475","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-06"},{"Chassi":"9BG148MK0VC401013","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-06"},{"Chassi":"9BG1481K0TC446948","Modelo":"S10 Work Truck 2","Data":"2026-05-06"},{"Chassi":"9BG1481K0TC447457","Modelo":"S10 Work Truck 2","Data":"2026-05-06"},{"Chassi":"9BG1481K0TC447575","Modelo":"S10 Work Truck 2","Data":"2026-05-06"},{"Chassi":"9BG1481K0TC449924","Modelo":"S10 Work Truck 2","Data":"2026-05-06"},{"Chassi":"9BG1481K0VC400216","Modelo":"S10 Work Truck 2","Data":"2026-05-06"},{"Chassi":"9BG1481K0VC400253","Modelo":"S10 Work Truck 2","Data":"2026-05-06"},{"Chassi":"9BG1481K0VC400316","Modelo":"S10 Work Truck 2","Data":"2026-05-06"},{"Chassi":"9BG1481K0VC400696","Modelo":"S10 Work Truck 2","Data":"2026-05-06"},{"Chassi":"9BG148PK0TC449915","Modelo":"S10 CREW CAB 4X4 2.8 DIE HIGH COUNTRY","Data":"2026-05-07"},{"Chassi":"9BG148MK0TC448865","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-07"},{"Chassi":"9BG148MK0TC450467","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-07"},{"Chassi":"9BG148MK0TC450541","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-08"},{"Chassi":"9BG148MK0VC400754","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-08"},{"Chassi":"9BG148MK0VC400833","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-08"},{"Chassi":"9BG148MK0VC400930","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-08"},{"Chassi":"9BG148MK0VC401669","Modelo":"S10 CREW CAB 4X4 2.8 DIE LTZ","Data":"2026-05-08"},{"Chassi":"9BG1481K0TC450124","Modelo":"S10 Work Truck 2","Data":"2026-05-08"},{"Chassi":"9BG1481K0VC400454","Modelo":"S10 Work Truck 2","Data":"2026-05-08"},{"Chassi":"9BG1481K0VC400488","Modelo":"S10 Work Truck 2","Data":"2026-05-08"}],"HYUNDAI":[{"Chassi":"9BHPB81EBVP294187","Modelo":"CRETA LIMITED 1.0T 6AT AV+2CAM+FCA+LFA","Data":"2026-05-04"},{"Chassi":"9BHPB81EBVP294205","Modelo":"CRETA LIMITED 1.0T 6AT AV+2CAM+FCA+LFA","Data":"2026-05-02"},{"Chassi":"9BHPB81EBVP294249","Modelo":"CRETA LIMITED 1.0T 6AT AV+2CAM+FCA+LFA","Data":"2026-04-30"},{"Chassi":"9BHPA81EBVP293219","Modelo":"CRETA COMFORT 1.0T 6AT AV+ADAS+2CAM+FCA","Data":"2026-04-28"},{"Chassi":"9BHPC81EBVP292995","Modelo":"CRETA PLATINUM 1.0T 6AT AVNT+2CAM+FCA","Data":"2026-04-27"},{"Chassi":"9BHPC81EBVP292847","Modelo":"CRETA PLATINUM 1.0T 6AT AVNT+2CAM+FCA","Data":"2026-04-24"},{"Chassi":"9BHPC81EBVP292786","Modelo":"CRETA PLATINUM 1.0T 6AT AVNT+2CAM+FCA","Data":"2026-04-24"},{"Chassi":"9BHPB81EBVP291574","Modelo":"CRETA LIMITED 1.0T 6AT AV+2CAM+FCA+LFA","Data":"2026-04-23"},{"Chassi":"9BHPC81EBVP286350","Modelo":"CRETA PLATINUM 1.0T 6AT AVNT+2CAM+FCA","Data":"2026-04-22"},{"Chassi":"9BHPB81EBVP291021","Modelo":"CRETA LIMITED 1.0T 6AT AV+2CAM+FCA+LFA","Data":"2026-04-20"},{"Chassi":"9BHPB81EBVP291578","Modelo":"CRETA LIMITED 1.0T 6AT AV+2CAM+FCA+LFA","Data":"2026-04-18"},{"Chassi":"9BHPC81EBVP293108","Modelo":"CRETA PLATINUM 1.0T 6AT AVNT+2CAM+FCA","Data":"2026-04-17"},{"Chassi":"9BHPC81EBVP286131","Modelo":"CRETA PLATINUM 1.0T 6AT AVNT+2CAM+FCA","Data":"2026-04-16"},{"Chassi":"9BHPB81EBVP291163","Modelo":"CRETA LIMITED 1.0T 6AT AV+2CAM+FCA+LFA","Data":"2026-04-16"},{"Chassi":"9BHPB81EBVP291573","Modelo":"CRETA LIMITED 1.0T 6AT AV+2CAM+FCA+LFA","Data":"2026-04-15"},{"Chassi":"9BHPC81EBVP287800","Modelo":"CRETA PLATINUM 1.0T 6AT AVNT+2CAM+FCA","Data":"2026-04-14"},{"Chassi":"9BHPA81EBVP285942","Modelo":"CRETA COMFORT 1.0T 6AT AV+ADAS+2CAM+FCA","Data":"2026-04-11"},{"Chassi":"9BHPC81EBVP286267","Modelo":"CRETA PLATINUM 1.0T 6AT AVNT+2CAM+FCA","Data":"2026-04-11"},{"Chassi":"9BHPC81EBVP285401","Modelo":"CRETA PLATINUM 1.0T 6AT AVNT+2CAM+FCA","Data":"2026-04-11"},{"Chassi":"9BHPC81EBVP285624","Modelo":"CRETA PLATINUM 1.0T 6AT AVNT+2CAM+FCA","Data":"2026-04-10"},{"Chassi":"9BHPA81EBVP284692","Modelo":"CRETA COMFORT 1.0T 6AT AV+ADAS+2CAM+FCA","Data":"2026-04-09"},{"Chassi":"9BHCU51FAVP852012","Modelo":"HB20 LIMITED 1.0 5MT AV+CAM+ESB+SMK+ROA","Data":"2026-04-07"},{"Chassi":"9BHPB81EBVP285886","Modelo":"CRETA LIMITED 1.0T 6AT AV+2CAM+FCA+LFA","Data":"2026-04-06"},{"Chassi":"9BHPC81EBTP272522","Modelo":"CRETA PLAT 1.0T 6AT AVNT+2CAM+FCA+LFA","Data":"2026-04-06"},{"Chassi":"9BHCU51FAVP852006","Modelo":"HB20 LIMITED 1.0 5MT AV+CAM+ESB+SMK+ROA","Data":"2026-04-02"},{"Chassi":"9BHCP51EBVP850391","Modelo":"HB20 LIMITED 1.0T 6AT AV+CAM+ESB+SMK+ROA","Data":"2026-03-31"},{"Chassi":"9BHPB81EBTP272378","Modelo":"CRETA LIMITED 1.0T 6AT AV+2CAM+FCA+LFA","Data":"2026-03-28"},{"Chassi":"9BHPC81EBVP286773","Modelo":"CRETA PLATINUM 1.0T 6AT AVNT+2CAM+FCA","Data":"2026-03-28"},{"Chassi":"9BHCU51FAVP848707","Modelo":"HB20 LIMITED 1.0 5MT AV+CAM+ESB+SMK+ROA","Data":"2026-03-27"},{"Chassi":"9BHPB81EBTP272606","Modelo":"CRETA LIMITED 1.0T 6AT AV+2CAM+FCA+LFA","Data":"2026-03-26"},{"Chassi":"9BHCU51FAVP852489","Modelo":"HB20 LIMITED 1.0 5MT AV+CAM+ESB+SMK+ROA","Data":"2026-03-24"},{"Chassi":"9BHPC81EBVP286137","Modelo":"CRETA PLATINUM 1.0T 6AT AVNT+2CAM+FCA","Data":"2026-03-24"},{"Chassi":"9BHCU51FAVP848688","Modelo":"HB20 LIMITED 1.0 5MT AV+CAM+ESB+SMK+ROA","Data":"2026-03-20"},{"Chassi":"9BHPA81EBVP284810","Modelo":"CRETA COMFORT 1.0T 6AT AV+ADAS+2CAM+FCA","Data":"2026-03-19"},{"Chassi":"9BHCP41EBVP848733","Modelo":"HB20S LIMITED 1.0T 6AT AV+CAM+ESB+SMK","Data":"2026-03-12"},{"Chassi":"9BHCU51FAVP848537","Modelo":"HB20 LIMITED 1.0 5MT AV+CAM+ESB+SMK+ROA","Data":"2026-03-11"},{"Chassi":"9BHPC81EBVP279365","Modelo":"CRETA PLATINUM 1.0T 6AT AVNT+2CAM+FCA","Data":"2026-03-03"},{"Chassi":"9BHCP51EBVP841282","Modelo":"HB20 PLATINUM 1.0T 6AT AV+RCCA+2CAM+LFA","Data":"2026-03-03"},{"Chassi":"9BHPC81EBVP282000","Modelo":"CRETA PLATINUM 1.0T 6AT AVNT+2CAM+FCA","Data":"2026-03-03"},{"Chassi":"9BHCP41EBVP841212","Modelo":"HB20S LIMITED 1.0T 6AT AV+CAM+ESB+SMK","Data":"2026-03-02"},{"Chassi":"9BHPB81EBVP280223","Modelo":"CRETA LIMITED 1.0T 6AT AV+2CAM+FCA+LFA","Data":"2026-03-02"},{"Chassi":"9BHPC81EBVP279804","Modelo":"CRETA PLATINUM 1.0T 6AT AVNT+2CAM+FCA","Data":"2026-02-26"},{"Chassi":"9BHCP41FAVP841932","Modelo":"HB20S LIMITED 1.0 5MT AV+CAM+ESB+SMK+ROA","Data":"2026-02-25"},{"Chassi":"9BHCP41FAVP841712","Modelo":"HB20S LIMITED 1.0 5MT AV+CAM+ESB+SMK+ROA","Data":"2026-02-25"},{"Chassi":"9BHCP41FAVP841733","Modelo":"HB20S LIMITED 1.0 5MT AV+CAM+ESB+SMK+ROA","Data":"2026-02-25"},{"Chassi":"9BHCP41FAVP841900","Modelo":"HB20S LIMITED 1.0 5MT AV+CAM+ESB+SMK+ROA","Data":"2026-02-25"},{"Chassi":"9BHPA81EBVP279487","Modelo":"CRETA COMFORT 1.0T 6AT AV+ADAS+2CAM+FCA","Data":"2026-02-25"},{"Chassi":"9BHCU51FAVP837883","Modelo":"HB20 LIMITED 1.0 5MT AV+CAM+ESB+SMK+ROA","Data":"2026-02-12"},{"Chassi":"9BHPA81EBTP273311","Modelo":"CRETA COMFORT 1.0T 6AT AV+ADAS+2CAM+FCA","Data":"2026-02-04"},{"Chassi":"9BHPB81EBTP273531","Modelo":"CRETA LIMITED 1.0T 6AT AV+2CAM+FCA+LFA","Data":"2026-01-29"}],"BYD":[{"Chassi":"LC0C74C40S5000770","Modelo":"SONG PRO GS DM","Data":"2024-07-04"},{"Chassi":"LC0C74C40S5001708","Modelo":"SONG PRO GS DM","Data":"2025-01-13"},{"Chassi":"LC0C74C40S5001773","Modelo":"SONG PRO GS DM","Data":"2025-01-27"},{"Chassi":"LC0C74C40S5002096","Modelo":"SONG PRO GS DM","Data":"2024-10-17"},{"Chassi":"LC0C74C40S5002342","Modelo":"SONG PRO GS DM","Data":"2025-03-06"},{"Chassi":"LC0C74C40S5004043","Modelo":"SONG PRO GS DM","Data":"2025-03-17"},{"Chassi":"LC0C74C40S5004088","Modelo":"SONG PRO GS DM","Data":"2024-09-24"},{"Chassi":"LC0C74C40S5005080","Modelo":"SONG PRO GS DM","Data":"2025-02-19"},{"Chassi":"LC0C74C40S5005127","Modelo":"SONG PRO GS DM","Data":"2025-01-22"},{"Chassi":"LC0C74C40S5005161","Modelo":"SONG PRO GS DM","Data":"2024-10-19"},{"Chassi":"LC0C74C40S5005256","Modelo":"SONG PRO GS DM","Data":"2024-11-05"},{"Chassi":"LC0C74C40S5005838","Modelo":"SONG PRO GS DM","Data":"2024-11-04"},{"Chassi":"LC0C74C40S5005953","Modelo":"SONG PRO GS DM","Data":"2024-10-31"},{"Chassi":"LC0C74C40S5010134","Modelo":"SONG PRO GS DM","Data":"2025-02-14"},{"Chassi":"LC0C74C40S5011932","Modelo":"SONG PRO GS DM","Data":"2025-02-07"},{"Chassi":"LC0C74C40S5012126","Modelo":"SONG PRO GS DM","Data":"2025-01-29"},{"Chassi":"LC0C74C40S5017617","Modelo":"SONG PRO GS DM","Data":"2024-11-25"},{"Chassi":"LC0C74C41S5000504","Modelo":"SONG PRO GS DM","Data":"2024-10-31"},{"Chassi":"LC0C74C41S5000809","Modelo":"SONG PRO GS DM","Data":"2024-11-26"},{"Chassi":"LC0C74C41S5001930","Modelo":"SONG PRO GS DM","Data":"2024-11-06"},{"Chassi":"LC0C74C41S5002513","Modelo":"SONG PRO GS DM","Data":"2025-02-27"},{"Chassi":"LC0C74C41S5002592","Modelo":"SONG PRO GS DM","Data":"2025-01-29"},{"Chassi":"LC0C74C41S5003287","Modelo":"SONG PRO GS DM","Data":"2024-11-25"},{"Chassi":"LC0C74C41S5004701","Modelo":"SONG PRO GS DM","Data":"2024-11-26"},{"Chassi":"LC0C74C41S5005069","Modelo":"SONG PRO GS DM","Data":"2024-10-28"},{"Chassi":"LC0C74C41S5006349","Modelo":"SONG PRO GS DM","Data":"2025-01-27"},{"Chassi":"LC0C74C41S5006769","Modelo":"SONG PRO GS DM","Data":"2025-02-25"},{"Chassi":"LC0C74C41S5006898","Modelo":"SONG PRO GS DM","Data":"2024-11-07"},{"Chassi":"LC0C74C41S5008165","Modelo":"SONG PRO GS DM","Data":"2024-11-01"},{"Chassi":"LC0C74C41S5010546","Modelo":"SONG PRO GS DM","Data":"2025-01-31"},{"Chassi":"LC0C74C41S5011177","Modelo":"SONG PRO GS DM","Data":"2025-02-14"},{"Chassi":"LC0C74C41S5012586","Modelo":"SONG PRO GS DM","Data":"2025-02-11"},{"Chassi":"LC0C74C41S5012698","Modelo":"SONG PRO GS DM","Data":"2025-02-06"},{"Chassi":"LC0C74C41S5013351","Modelo":"SONG PRO GS DM","Data":"2025-02-17"},{"Chassi":"LC0C74C41S5014645","Modelo":"SONG PRO GS DM","Data":"2025-01-30"},{"Chassi":"LC0C74C41S5016380","Modelo":"SONG PRO GS DM","Data":"2025-01-29"},{"Chassi":"LC0C74C41S5017903","Modelo":"SONG PRO GS DM","Data":"2025-01-30"},{"Chassi":"LC0C74C41T5002724","Modelo":"SONG PRO GS DM","Data":"2025-07-10"},{"Chassi":"LC0C74C41T5016235","Modelo":"SONG PRO GS DM","Data":"2025-07-17"},{"Chassi":"LC0C74C42S5001676","Modelo":"SONG PRO GS DM","Data":"2024-11-07"},{"Chassi":"LC0C74C42S5001693","Modelo":"SONG PRO GS DM","Data":"2025-02-25"},{"Chassi":"LC0C74C42S5002004","Modelo":"SONG PRO GS DM","Data":"2024-11-07"},{"Chassi":"LC0C74C42S5002830","Modelo":"SONG PRO GS DM","Data":"2024-11-28"},{"Chassi":"LC0C74C42S5003928","Modelo":"SONG PRO GS DM","Data":"2024-11-27"},{"Chassi":"LC0C74C42S5004741","Modelo":"SONG PRO GS DM","Data":"2025-01-23"},{"Chassi":"LC0C74C42S5005078","Modelo":"SONG PRO GS DM","Data":"2024-11-07"},{"Chassi":"LC0C74C42S5006151","Modelo":"SONG PRO GS DM","Data":"2024-11-21"},{"Chassi":"LC0C74C42S5006232","Modelo":"SONG PRO GS DM","Data":"2024-10-19"},{"Chassi":"LC0C74C42S5006778","Modelo":"SONG PRO GS DM","Data":"2024-11-25"},{"Chassi":"LC0C74C42S5006795","Modelo":"SONG PRO GS DM","Data":"2024-11-05"},{"Chassi":"LC0C74C42S5006876","Modelo":"SONG PRO GS DM","Data":"2025-01-30"},{"Chassi":"LC0C74C42S5007302","Modelo":"SONG PRO GS DM","Data":"2024-09-12"},{"Chassi":"LC0C74C42S5010040","Modelo":"SONG PRO GS DM","Data":"2025-02-17"},{"Chassi":"LC0C74C42S5010698","Modelo":"SONG PRO GS DM","Data":"2025-02-05"},{"Chassi":"LC0C74C42S5011107","Modelo":"SONG PRO GS DM","Data":"2025-02-07"},{"Chassi":"LC0C74C42S5011320","Modelo":"SONG PRO GS DM","Data":"2025-02-05"},{"Chassi":"LC0C74C42S5012323","Modelo":"SONG PRO GS DM","Data":"2024-12-05"},{"Chassi":"LC0C74C42S5012872","Modelo":"SONG PRO GS DM","Data":"2025-01-13"},{"Chassi":"LC0C74C42S5014282","Modelo":"SONG PRO GS DM","Data":"2025-02-11"},{"Chassi":"LC0C74C42S5019532","Modelo":"SONG PRO GS DM","Data":"2024-10-28"},{"Chassi":"LC0C74C42S5019899","Modelo":"SONG PRO GS DM","Data":"2025-02-14"},{"Chassi":"LC0C74C42T5016115","Modelo":"SONG PRO GS DM","Data":"2025-07-04"},{"Chassi":"LC0C74C42T5016650","Modelo":"SONG PRO GS DM","Data":"2025-11-07"},{"Chassi":"LC0C74C43S5001444","Modelo":"SONG PRO GS DM","Data":"2024-07-25"},{"Chassi":"LC0C74C43S5001864","Modelo":"SONG PRO GS DM","Data":"2025-03-06"},{"Chassi":"LC0C74C43S5002500","Modelo":"SONG PRO GS DM","Data":"2025-01-23"},{"Chassi":"LC0C74C43S5002691","Modelo":"SONG PRO GS DM","Data":"2024-11-21"},{"Chassi":"LC0C74C43S5003386","Modelo":"SONG PRO GS DM","Data":"2024-08-06"},{"Chassi":"LC0C74C43S5003713","Modelo":"SONG PRO GS DM","Data":"2024-07-11"},{"Chassi":"LC0C74C43S5004263","Modelo":"SONG PRO GS DM","Data":"2024-10-19"},{"Chassi":"LC0C74C43S5004618","Modelo":"SONG PRO GS DM","Data":"2024-11-21"},{"Chassi":"LC0C74C43S5004716","Modelo":"SONG PRO GS DM","Data":"2024-10-30"},{"Chassi":"LC0C74C43S5005090","Modelo":"SONG PRO GS DM","Data":"2024-11-01"},{"Chassi":"LC0C74C43S5005123","Modelo":"SONG PRO GS DM","Data":"2024-11-21"},{"Chassi":"LC0C74C43S5005638","Modelo":"SONG PRO GS DM","Data":"2024-11-06"},{"Chassi":"LC0C74C43S5006577","Modelo":"SONG PRO GS DM","Data":"2025-01-30"},{"Chassi":"LC0C74C43S5006725","Modelo":"SONG PRO GS DM","Data":"2025-01-30"},{"Chassi":"LC0C74C43S5012721","Modelo":"SONG PRO GS DM","Data":"2025-01-21"},{"Chassi":"LC0C74C43S5013898","Modelo":"SONG PRO GS DM","Data":"2025-01-16"},{"Chassi":"LC0C74C43S5015473","Modelo":"SONG PRO GS DM","Data":"2024-11-07"},{"Chassi":"LC0C74C43S5018728","Modelo":"SONG PRO GS DM","Data":"2025-03-27"},{"Chassi":"LC0C74C43S5019054","Modelo":"SONG PRO GS DM","Data":"2024-12-11"},{"Chassi":"LC0C74C43S5022312","Modelo":"SONG PRO GL DM","Data":"2024-11-08"},{"Chassi":"LC0C74C43T5016513","Modelo":"SONG PRO GS DM","Data":"2025-06-30"},{"Chassi":"LC0C74C44S5001338","Modelo":"SONG PRO GS DM","Data":"2024-09-24"},{"Chassi":"LC0C74C44S5001887","Modelo":"SONG PRO GS DM","Data":"2024-09-24"},{"Chassi":"LC0C74C44S5002358","Modelo":"SONG PRO GS DM","Data":"2024-12-11"},{"Chassi":"LC0C74C44S5003378","Modelo":"SONG PRO GS DM","Data":"2024-09-24"},{"Chassi":"LC0C74C44S5003526","Modelo":"SONG PRO GS DM","Data":"2024-11-21"},{"Chassi":"LC0C74C44S5005003","Modelo":"SONG PRO GS DM","Data":"2024-11-05"},{"Chassi":"LC0C74C44S5005289","Modelo":"SONG PRO GS DM","Data":"2024-09-24"},{"Chassi":"LC0C74C44S5005485","Modelo":"SONG PRO GS DM","Data":"2024-11-22"},{"Chassi":"LC0C74C44S5005891","Modelo":"SONG PRO GS DM","Data":"2024-10-31"},{"Chassi":"LC0C74C44S5006538","Modelo":"SONG PRO GS DM","Data":"2024-11-21"},{"Chassi":"LC0C74C44S5006720","Modelo":"SONG PRO GS DM","Data":"2024-11-26"},{"Chassi":"LC0C74C44S5011089","Modelo":"SONG PRO GS DM","Data":"2025-01-14"},{"Chassi":"LC0C74C44S5012629","Modelo":"SONG PRO GS DM","Data":"2025-02-14"},{"Chassi":"LC0C74C44S5014249","Modelo":"SONG PRO GS DM","Data":"2025-02-13"},{"Chassi":"LC0C74C44S5019483","Modelo":"SONG PRO GS DM","Data":"2025-02-14"},{"Chassi":"LC0C74C44T5016522","Modelo":"SONG PRO GS DM","Data":"2025-07-02"},{"Chassi":"LC0C74C45S5001770","Modelo":"SONG PRO GS DM","Data":"2024-10-30"},{"Chassi":"LC0C74C45S5002479","Modelo":"SONG PRO GS DM","Data":"2025-03-31"},{"Chassi":"LC0C74C45S5003504","Modelo":"SONG PRO GS DM","Data":"2025-03-17"},{"Chassi":"LC0C74C45S5003860","Modelo":"SONG PRO GS DM","Data":"2024-11-21"},{"Chassi":"LC0C74C45S5003924","Modelo":"SONG PRO GS DM","Data":"2024-11-26"},{"Chassi":"LC0C74C45S5004328","Modelo":"SONG PRO GS DM","Data":"2024-11-26"},{"Chassi":"LC0C74C45S5004491","Modelo":"SONG PRO GS DM","Data":"2025-01-23"},{"Chassi":"LC0C74C45S5004782","Modelo":"SONG PRO GS DM","Data":"2025-02-21"},{"Chassi":"LC0C74C45S5005558","Modelo":"SONG PRO GS DM","Data":"2024-11-05"},{"Chassi":"LC0C74C45S5005611","Modelo":"SONG PRO GS DM","Data":"2025-01-16"},{"Chassi":"LC0C74C45S5009044","Modelo":"SONG PRO GS DM","Data":"2024-07-18"},{"Chassi":"LC0C74C45S5010775","Modelo":"SONG PRO GS DM","Data":"2025-05-19"},{"Chassi":"LC0C74C45S5010954","Modelo":"SONG PRO GS DM","Data":"2025-02-12"},{"Chassi":"LC0C74C45S5012719","Modelo":"SONG PRO GS DM","Data":"2025-02-11"},{"Chassi":"LC0C74C45S5014101","Modelo":"SONG PRO GS DM","Data":"2024-10-17"},{"Chassi":"LC0C74C45S5015488","Modelo":"SONG PRO GS DM","Data":"2025-01-29"},{"Chassi":"LC0C74C45S5016446","Modelo":"SONG PRO GS DM","Data":"2024-11-18"},{"Chassi":"LC0C74C45S5017130","Modelo":"SONG PRO GL DM","Data":"2025-01-22"},{"Chassi":"LC0C74C45S5019587","Modelo":"SONG PRO GS DM","Data":"2025-02-17"},{"Chassi":"LC0C74C45S5020822","Modelo":"SONG PRO GS DM","Data":"2024-10-09"},{"Chassi":"LC0C74C45S5021808","Modelo":"SONG PRO GL DM","Data":"2024-12-11"},{"Chassi":"LC0C74C45T5016433","Modelo":"SONG PRO GS DM","Data":"2026-01-29"},{"Chassi":"LC0C74C46S5001650","Modelo":"SONG PRO GS DM","Data":"2024-10-19"},{"Chassi":"LC0C74C46S5001776","Modelo":"SONG PRO GS DM","Data":"2024-09-24"},{"Chassi":"LC0C74C46S5001860","Modelo":"SONG PRO GS DM","Data":"2025-02-04"},{"Chassi":"LC0C74C46S5001924","Modelo":"SONG PRO GS DM","Data":"2024-11-05"},{"Chassi":"LC0C74C46S5002135","Modelo":"SONG PRO GS DM","Data":"2024-07-02"},{"Chassi":"LC0C74C46S5002927","Modelo":"SONG PRO GS DM","Data":"2024-09-05"},{"Chassi":"LC0C74C46S5003656","Modelo":"SONG PRO GS DM","Data":"2025-01-15"},{"Chassi":"LC0C74C46S5004676","Modelo":"SONG PRO GS DM","Data":"2024-11-08"},{"Chassi":"LC0C74C46S5004743","Modelo":"SONG PRO GS DM","Data":"2025-04-02"},{"Chassi":"LC0C74C46S5004838","Modelo":"SONG PRO GS DM","Data":"2025-01-30"},{"Chassi":"LC0C74C46S5005634","Modelo":"SONG PRO GS DM","Data":"2024-09-24"},{"Chassi":"LC0C74C46S5005651","Modelo":"SONG PRO GS DM","Data":"2024-09-24"},{"Chassi":"LC0C74C46S5006525","Modelo":"SONG PRO GS DM","Data":"2024-11-04"},{"Chassi":"LC0C74C46S5007321","Modelo":"SONG PRO GS DM","Data":"2025-01-30"},{"Chassi":"LC0C74C46S5010557","Modelo":"SONG PRO GS DM","Data":"2025-01-29"},{"Chassi":"LC0C74C46S5010705","Modelo":"SONG PRO GS DM","Data":"2025-02-06"},{"Chassi":"LC0C74C46S5013118","Modelo":"SONG PRO GS DM","Data":"2024-10-28"},{"Chassi":"LC0C74C46S5014589","Modelo":"SONG PRO GS DM","Data":"2025-02-14"},{"Chassi":"LC0C74C46T5016232","Modelo":"SONG PRO GS DM","Data":"2025-06-30"},{"Chassi":"LC0C74C47S5000524","Modelo":"SONG PRO GS DM","Data":"2024-11-04"},{"Chassi":"LC0C74C47S5001026","Modelo":"SONG PRO GS DM","Data":"2024-10-31"},{"Chassi":"LC0C74C47S5001303","Modelo":"SONG PRO GS DM","Data":"2024-10-31"},{"Chassi":"LC0C74C47S5001575","Modelo":"SONG PRO GS DM","Data":"2024-11-22"},{"Chassi":"LC0C74C47S5001656","Modelo":"SONG PRO GS DM","Data":"2024-11-07"},{"Chassi":"LC0C74C47S5001804","Modelo":"SONG PRO GS DM","Data":"2024-11-22"},{"Chassi":"LC0C74C47S5001883","Modelo":"SONG PRO GS DM","Data":"2024-11-25"},{"Chassi":"LC0C74C47S5002578","Modelo":"SONG PRO GS DM","Data":"2024-10-30"},{"Chassi":"LC0C74C47S5002807","Modelo":"SONG PRO GS DM","Data":"2024-11-08"},{"Chassi":"LC0C74C47S5003570","Modelo":"SONG PRO GS DM","Data":"2024-10-19"},{"Chassi":"LC0C74C47S5003648","Modelo":"SONG PRO GS DM","Data":"2025-02-13"},{"Chassi":"LC0C74C47S5004718","Modelo":"SONG PRO GS DM","Data":"2024-11-05"},{"Chassi":"LC0C74C47S5005965","Modelo":"SONG PRO GS DM","Data":"2024-10-30"},{"Chassi":"LC0C74C47S5008218","Modelo":"SONG PRO GS DM","Data":"2024-11-01"},{"Chassi":"LC0C74C47S5013953","Modelo":"SONG PRO GS DM","Data":"2025-01-14"},{"Chassi":"LC0C74C48S5000306","Modelo":"SONG PRO GS DM","Data":"2024-10-19"},{"Chassi":"LC0C74C48S5000581","Modelo":"SONG PRO GS DM","Data":"2024-11-26"},{"Chassi":"LC0C74C48S5000841","Modelo":"SONG PRO GS DM","Data":"2024-10-31"},{"Chassi":"LC0C74C48S5001682","Modelo":"SONG PRO GS DM","Data":"2024-11-21"},{"Chassi":"LC0C74C48S5001942","Modelo":"SONG PRO GS DM","Data":"2024-11-21"},{"Chassi":"LC0C74C48S5003786","Modelo":"SONG PRO GS DM","Data":"2024-11-07"},{"Chassi":"LC0C74C48S5005490","Modelo":"SONG PRO GS DM","Data":"2024-10-19"},{"Chassi":"LC0C74C48S5005697","Modelo":"SONG PRO GS DM","Data":"2024-11-07"},{"Chassi":"LC0C74C48S5005747","Modelo":"SONG PRO GS DM","Data":"2025-01-24"},{"Chassi":"LC0C74C48S5006378","Modelo":"SONG PRO GS DM","Data":"2025-01-14"},{"Chassi":"LC0C74C48S5007417","Modelo":"SONG PRO GS DM","Data":"2025-01-13"},{"Chassi":"LC0C74C48S5010057","Modelo":"SONG PRO GS DM","Data":"2024-07-23"},{"Chassi":"LC0C74C48S5010110","Modelo":"SONG PRO GS DM","Data":"2025-02-14"},{"Chassi":"LC0C74C48S5011953","Modelo":"SONG PRO GS DM","Data":"2025-02-17"},{"Chassi":"LC0C74C48S5020880","Modelo":"SONG PRO GL DM","Data":"2024-10-25"},{"Chassi":"LC0C74C48T5015857","Modelo":"SONG PRO GL DM","Data":"2025-12-15"},{"Chassi":"LC0C74C48T5016121","Modelo":"SONG PRO GS DM","Data":"2025-07-16"},{"Chassi":"LC0C74C48T5016233","Modelo":"SONG PRO GS DM","Data":"2025-09-23"},{"Chassi":"LC0C74C48T5016278","Modelo":"SONG PRO GS DM","Data":"2025-08-04"},{"Chassi":"LC0C74C48T5016362","Modelo":"SONG PRO GS DM","Data":"2025-07-22"},{"Chassi":"LC0C74C49S5001416","Modelo":"SONG PRO GS DM","Data":"2024-11-21"},{"Chassi":"LC0C74C49S5001786","Modelo":"SONG PRO GS DM","Data":"2024-07-25"},{"Chassi":"LC0C74C49S5002016","Modelo":"SONG PRO GS DM","Data":"2025-03-21"},{"Chassi":"LC0C74C49S5002226","Modelo":"SONG PRO GS DM","Data":"2024-10-19"},{"Chassi":"LC0C74C49S5003053","Modelo":"SONG PRO GS DM","Data":"2024-10-28"},{"Chassi":"LC0C74C49S5003862","Modelo":"SONG PRO GS DM","Data":"2024-12-09"},{"Chassi":"LC0C74C49S5004879","Modelo":"SONG PRO GS DM","Data":"2024-10-19"},{"Chassi":"LC0C74C49S5005434","Modelo":"SONG PRO GS DM","Data":"2024-09-24"},{"Chassi":"LC0C74C49S5005871","Modelo":"SONG PRO GS DM","Data":"2024-11-22"},{"Chassi":"LC0C74C49S5006762","Modelo":"SONG PRO GS DM","Data":"2025-01-16"},{"Chassi":"LC0C74C49S5006812","Modelo":"SONG PRO GS DM","Data":"2024-10-19"},{"Chassi":"LC0C74C49S5006938","Modelo":"SONG PRO GS DM","Data":"2024-10-19"},{"Chassi":"LC0C74C49S5007118","Modelo":"SONG PRO GS DM","Data":"2025-04-10"},{"Chassi":"LC0C74C49S5007815","Modelo":"SONG PRO GS DM","Data":"2025-02-20"},{"Chassi":"LC0C74C49S5010455","Modelo":"SONG PRO GS DM","Data":"2024-10-15"},{"Chassi":"LC0C74C49S5011878","Modelo":"SONG PRO GS DM","Data":"2024-07-18"},{"Chassi":"LC0C74C49S5015252","Modelo":"SONG PRO GS DM","Data":"2025-02-11"},{"Chassi":"LC0C74C49S5016336","Modelo":"SONG PRO GS DM","Data":"2025-01-21"},{"Chassi":"LC0C74C49S5018345","Modelo":"SONG PRO GS DM","Data":"2025-01-29"},{"Chassi":"LC0C74C49S5020712","Modelo":"SONG PRO GS DM","Data":"2024-10-25"},{"Chassi":"LC0C74C49T5016029","Modelo":"SONG PRO GS DM","Data":"2025-07-02"},{"Chassi":"LC0C74C49T5016354","Modelo":"SONG PRO GS DM","Data":"2025-06-30"},{"Chassi":"LC0C74C49T5016774","Modelo":"SONG PRO GS DM","Data":"2025-07-07"},{"Chassi":"LC0C74C4XS5000890","Modelo":"SONG PRO GS DM","Data":"2024-10-30"},{"Chassi":"LC0C74C4XS5001019","Modelo":"SONG PRO GS DM","Data":"2024-10-28"},{"Chassi":"LC0C74C4XS5002588","Modelo":"SONG PRO GS DM","Data":"2024-11-22"},{"Chassi":"LC0C74C4XS5002686","Modelo":"SONG PRO GS DM","Data":"2024-11-22"},{"Chassi":"LC0C74C4XS5003224","Modelo":"SONG PRO GS DM","Data":"2024-11-28"},{"Chassi":"LC0C74C4XS5004079","Modelo":"SONG PRO GS DM","Data":"2025-04-01"},{"Chassi":"LC0C74C4XS5004387","Modelo":"SONG PRO GS DM","Data":"2024-10-31"},{"Chassi":"LC0C74C4XS5004485","Modelo":"SONG PRO GS DM","Data":"2024-11-25"},{"Chassi":"LC0C74C4XS5005961","Modelo":"SONG PRO GS DM","Data":"2024-10-30"},{"Chassi":"LC0C74C4XS5006186","Modelo":"SONG PRO GS DM","Data":"2025-02-17"},{"Chassi":"LC0C74C4XS5006284","Modelo":"SONG PRO GS DM","Data":"2024-07-19"},{"Chassi":"LC0C74C4XS5006771","Modelo":"SONG PRO GS DM","Data":"2024-10-30"},{"Chassi":"LC0C74C4XS5007130","Modelo":"SONG PRO GS DM","Data":"2024-11-25"},{"Chassi":"LC0C74C4XS5007547","Modelo":"SONG PRO GS DM","Data":"2024-11-08"},{"Chassi":"LC0C74C4XS5009606","Modelo":"SONG PRO GS DM","Data":"2025-01-24"},{"Chassi":"LC0C74C4XS5011873","Modelo":"SONG PRO GS DM","Data":"2024-09-05"},{"Chassi":"LC0C74C4XS5012568","Modelo":"SONG PRO GS DM","Data":"2025-02-14"},{"Chassi":"LC0C74C4XS5012697","Modelo":"SONG PRO GS DM","Data":"2024-11-26"},{"Chassi":"LC0C74C4XS5014255","Modelo":"SONG PRO GS DM","Data":"2024-11-27"},{"Chassi":"LC0C74C4XS5014949","Modelo":"SONG PRO GS DM","Data":"2025-02-17"},{"Chassi":"LC0C74C4XS5015017","Modelo":"SONG PRO GS DM","Data":"2024-10-22"},{"Chassi":"LC0C74C4XS5015910","Modelo":"SONG PRO GS DM","Data":"2025-04-01"},{"Chassi":"LC0C74C4XS5022288","Modelo":"SONG PRO GL DM","Data":"2024-11-11"},{"Chassi":"LC0C74C4XT5015682","Modelo":"SONG PRO GS DM","Data":"2025-07-18"},{"Chassi":"LC0C76C40S0012930","Modelo":"KING GS DM","Data":"2024-09-24"},{"Chassi":"LC0C76C40S0019327","Modelo":"KING GS DM","Data":"2025-03-20"},{"Chassi":"LC0C76C40S0019375","Modelo":"KING GS DM","Data":"2024-12-06"},{"Chassi":"LC0C76C40S0020123","Modelo":"KING GS DM","Data":"2024-11-22"},{"Chassi":"LC0C76C40S0022311","Modelo":"KING GS DM","Data":"2025-03-19"},{"Chassi":"LC0C76C40S0023085","Modelo":"KING GS DM","Data":"2024-11-13"},{"Chassi":"LC0C76C40S0023149","Modelo":"KING GS DM","Data":"2024-11-26"},{"Chassi":"LC0C76C40S0023233","Modelo":"KING GS DM","Data":"2025-03-19"},{"Chassi":"LC0C76C40S0023295","Modelo":"KING GS DM","Data":"2025-03-20"},{"Chassi":"LC0C76C40S0023474","Modelo":"KING GS DM","Data":"2024-11-26"},{"Chassi":"LC0C76C40S0023507","Modelo":"KING GS DM","Data":"2024-10-21"},{"Chassi":"LC0C76C40S0023880","Modelo":"KING GS DM","Data":"2024-10-01"},{"Chassi":"LC0C76C40S0026570","Modelo":"KING GS DM","Data":"2025-01-14"},{"Chassi":"LC0C76C40S0026746","Modelo":"KING GS DM","Data":"2025-01-23"},{"Chassi":"LC0C76C41S0012841","Modelo":"KING GS DM","Data":"2024-11-08"},{"Chassi":"LC0C76C41S0014332","Modelo":"KING GS DM","Data":"2025-04-03"},{"Chassi":"LC0C76C41S0017201","Modelo":"KING GS DM","Data":"2024-12-06"},{"Chassi":"LC0C76C41S0017232","Modelo":"KING GS DM","Data":"2025-01-23"},{"Chassi":"LC0C76C41S0018364","Modelo":"KING GS DM","Data":"2025-01-23"},{"Chassi":"LC0C76C41S0023144","Modelo":"KING GS DM","Data":"2025-02-28"},{"Chassi":"LC0C76C41S0023189","Modelo":"KING GS DM","Data":"2024-12-06"},{"Chassi":"LC0C76C41S0023211","Modelo":"KING GS DM","Data":"2024-10-14"},{"Chassi":"LC0C76C41S0023435","Modelo":"KING GS DM","Data":"2024-10-01"},{"Chassi":"LC0C76C41S0023743","Modelo":"KING GS DM","Data":"2025-03-20"},{"Chassi":"LC0C76C42S0013657","Modelo":"KING GS DM","Data":"2024-11-26"},{"Chassi":"LC0C76C42S0017241","Modelo":"KING GS DM","Data":"2024-12-10"},{"Chassi":"LC0C76C42S0017630","Modelo":"KING GS DM","Data":"2025-03-19"},{"Chassi":"LC0C76C42S0018244","Modelo":"KING GS DM","Data":"2025-04-03"},{"Chassi":"LC0C76C42S0018356","Modelo":"KING GS DM","Data":"2024-11-07"},{"Chassi":"LC0C76C42S0021547","Modelo":"KING GS DM","Data":"2024-11-06"},{"Chassi":"LC0C76C42S0022231","Modelo":"KING GS DM","Data":"2025-02-14"},{"Chassi":"LC0C76C42S0022777","Modelo":"KING GS DM","Data":"2025-05-07"},{"Chassi":"LC0C76C42S0023167","Modelo":"KING GS DM","Data":"2024-10-10"},{"Chassi":"LC0C76C42S0023184","Modelo":"KING GS DM","Data":"2025-04-28"},{"Chassi":"LC0C76C42S0023217","Modelo":"KING GS DM","Data":"2025-03-19"},{"Chassi":"LC0C76C43S0021072","Modelo":"KING GS DM","Data":"2024-11-22"},{"Chassi":"LC0C76C43S0022304","Modelo":"KING GS DM","Data":"2024-10-01"},{"Chassi":"LC0C76C43S0023212","Modelo":"KING GS DM","Data":"2025-03-19"},{"Chassi":"LC0C76C43S0023243","Modelo":"KING GS DM","Data":"2024-12-06"},{"Chassi":"LC0C76C43S0023257","Modelo":"KING GS DM","Data":"2025-03-18"},{"Chassi":"LC0C76C43S0023260","Modelo":"KING GS DM","Data":"2025-03-19"},{"Chassi":"LC0C76C43S0023274","Modelo":"KING GS DM","Data":"2024-11-12"},{"Chassi":"LC0C76C43S0023372","Modelo":"KING GS DM","Data":"2025-02-17"},{"Chassi":"LC0C76C43S0023954","Modelo":"KING GS DM","Data":"2024-10-25"},{"Chassi":"LC0C76C43S0026692","Modelo":"KING GS DM","Data":"2024-07-19"},{"Chassi":"LC0C76C43S0026756","Modelo":"KING GS DM","Data":"2024-10-28"},{"Chassi":"LC0C76C43S0027258","Modelo":"KING GS DM","Data":"2024-07-22"},{"Chassi":"LC0C76C44S0016947","Modelo":"KING GS DM","Data":"2024-12-29"},{"Chassi":"LC0C76C44S0017211","Modelo":"KING GS DM","Data":"2025-01-30"},{"Chassi":"LC0C76C44S0018407","Modelo":"KING GS DM","Data":"2024-11-06"},{"Chassi":"LC0C76C44S0020156","Modelo":"KING GS DM","Data":"2024-11-22"},{"Chassi":"LC0C76C44S0021999","Modelo":"KING GS DM","Data":"2024-10-16"},{"Chassi":"LC0C76C44S0023218","Modelo":"KING GS DM","Data":"2024-12-06"},{"Chassi":"LC0C76C44S0023770","Modelo":"KING GS DM","Data":"2025-03-20"},{"Chassi":"LC0C76C44S0023932","Modelo":"KING GS DM","Data":"2024-10-14"},{"Chassi":"LC0C76C44S0024742","Modelo":"KING GS DM","Data":"2025-03-20"},{"Chassi":"LC0C76C44S0027057","Modelo":"KING GS DM","Data":"2024-12-06"},{"Chassi":"LC0C76C45S0016844","Modelo":"KING GS DM","Data":"2025-01-23"},{"Chassi":"LC0C76C45S0017654","Modelo":"KING GS DM","Data":"2024-06-27"},{"Chassi":"LC0C76C45S0023213","Modelo":"KING GS DM","Data":"2024-12-29"},{"Chassi":"LC0C76C45S0023230","Modelo":"KING GS DM","Data":"2024-10-15"},{"Chassi":"LC0C76C45S0023390","Modelo":"KING GS DM","Data":"2025-02-13"},{"Chassi":"LC0C76C46S0014407","Modelo":"KING GS DM","Data":"2024-12-06"},{"Chassi":"LC0C76C46S0021518","Modelo":"KING GS DM","Data":"2024-11-26"},{"Chassi":"LC0C76C46S0023219","Modelo":"KING GS DM","Data":"2025-03-19"},{"Chassi":"LC0C76C46S0023222","Modelo":"KING GS DM","Data":"2025-01-14"},{"Chassi":"LC0C76C46S0023236","Modelo":"KING GS DM","Data":"2024-11-13"},{"Chassi":"LC0C76C46S0023317","Modelo":"KING GS DM","Data":"2025-01-13"},{"Chassi":"LC0C76C46S0023320","Modelo":"KING GS DM","Data":"2024-10-09"},{"Chassi":"LC0C76C47S0014416","Modelo":"KING GS DM","Data":"2025-01-14"},{"Chassi":"LC0C76C47S0019230","Modelo":"KING GS DM","Data":"2025-03-20"},{"Chassi":"LC0C76C47S0022841","Modelo":"KING GS DM","Data":"2025-03-19"},{"Chassi":"LC0C76C47S0023195","Modelo":"KING GS DM","Data":"2025-03-19"},{"Chassi":"LC0C76C47S0023214","Modelo":"KING GS DM","Data":"2025-02-28"},{"Chassi":"LC0C76C47S0023228","Modelo":"KING GS DM","Data":"2025-02-24"},{"Chassi":"LC0C76C47S0026002","Modelo":"KING GS DM","Data":"2024-08-05"},{"Chassi":"LC0C76C47S0026033","Modelo":"KING GS DM","Data":"2025-03-07"},{"Chassi":"LC0C76C48S0015266","Modelo":"KING GS DM","Data":"2024-12-06"},{"Chassi":"LC0C76C48S0018281","Modelo":"KING GS DM","Data":"2025-01-15"},{"Chassi":"LC0C76C48S0021665","Modelo":"KING GS DM","Data":"2024-11-22"},{"Chassi":"LC0C76C48S0023030","Modelo":"KING GL DM","Data":"2024-11-07"},{"Chassi":"LC0C76C48S0023108","Modelo":"KING GS DM","Data":"2024-10-25"},{"Chassi":"LC0C76C48S0023142","Modelo":"KING GS DM","Data":"2025-03-19"},{"Chassi":"LC0C76C48S0023190","Modelo":"KING GS DM","Data":"2024-11-26"},{"Chassi":"LC0C76C48S0023237","Modelo":"KING GS DM","Data":"2024-11-07"},{"Chassi":"LC0C76C48S0023240","Modelo":"KING GS DM","Data":"2024-11-12"},{"Chassi":"LC0C76C48S0023254","Modelo":"KING GS DM","Data":"2024-11-13"},{"Chassi":"LC0C76C48S0023772","Modelo":"KING GS DM","Data":"2024-11-12"},{"Chassi":"LC0C76C48S0026476","Modelo":"KING GS DM","Data":"2024-12-06"},{"Chassi":"LC0C76C48T0013292","Modelo":"KING GL DM","Data":"2025-07-15"},{"Chassi":"LC0C76C49S0014269","Modelo":"KING GS DM","Data":"2024-10-30"},{"Chassi":"LC0C76C49S0017608","Modelo":"KING GS DM","Data":"2025-03-06"},{"Chassi":"LC0C76C49S0020119","Modelo":"KING GS DM","Data":"2025-03-19"},{"Chassi":"LC0C76C49S0020198","Modelo":"KING GS DM","Data":"2025-03-20"},{"Chassi":"LC0C76C49S0022842","Modelo":"KING GS DM","Data":"2024-10-25"},{"Chassi":"LC0C76C49S0023232","Modelo":"KING GS DM","Data":"2024-11-26"},{"Chassi":"LC0C76C49S0023439","Modelo":"KING GS DM","Data":"2024-11-27"},{"Chassi":"LC0C76C49S0023893","Modelo":"KING GS DM","Data":"2025-02-24"},{"Chassi":"LC0C76C49S0026356","Modelo":"KING GS DM","Data":"2025-03-06"},{"Chassi":"LC0C76C49S0028639","Modelo":"KING GS DM","Data":"2024-11-08"},{"Chassi":"LC0C76C49S0029578","Modelo":"KING GS DM","Data":"2025-03-19"},{"Chassi":"LC0C76C4XS0014328","Modelo":"KING GS DM","Data":"2025-03-19"},{"Chassi":"LC0C76C4XS0021442","Modelo":"KING GS DM","Data":"2024-11-06"},{"Chassi":"LC0C76C4XS0022218","Modelo":"KING GS DM","Data":"2024-10-16"},{"Chassi":"LC0C76C4XS0022588","Modelo":"KING GS DM","Data":"2025-04-30"},{"Chassi":"LC0C76C4XS0023546","Modelo":"KING GS DM","Data":"2025-02-12"},{"Chassi":"LC0C76C4XS0023739","Modelo":"KING GS DM","Data":"2024-10-22"},{"Chassi":"LC0C76C4XS0024647","Modelo":"KING GS DM","Data":"2025-03-06"},{"Chassi":"LC0C76C4XS0026088","Modelo":"KING GS DM","Data":"2025-03-21"},{"Chassi":"LC0CE4CB0S0014749","Modelo":"DOLPHIN PLUS","Data":"2025-01-31"},{"Chassi":"LC0CE4CB0S0015660","Modelo":"DOLPHIN PLUS","Data":"2025-04-30"},{"Chassi":"LC0CE4CB0S0015786","Modelo":"DOLPHIN PLUS","Data":"2025-05-07"},{"Chassi":"LC0CE4CB0S0017831","Modelo":"DOLPHIN PLUS","Data":"2025-04-30"},{"Chassi":"LC0CE4CB1S0015652","Modelo":"DOLPHIN PLUS","Data":"2025-01-30"},{"Chassi":"LC0CE4CB1S0017854","Modelo":"DOLPHIN PLUS","Data":"2025-04-29"},{"Chassi":"LC0CE4CB1S0019474","Modelo":"DOLPHIN PLUS","Data":"2025-04-29"},{"Chassi":"LC0CE4CB2S0014722","Modelo":"DOLPHIN PLUS","Data":"2025-02-07"},{"Chassi":"LC0CE4CB2S0015658","Modelo":"DOLPHIN PLUS","Data":"2025-01-31"},{"Chassi":"LC0CE4CB2S0015806","Modelo":"DOLPHIN PLUS","Data":"2025-02-04"},{"Chassi":"LC0CE4CB2S0016423","Modelo":"DOLPHIN PLUS","Data":"2025-04-29"},{"Chassi":"LC0CE4CB2S0017846","Modelo":"DOLPHIN PLUS","Data":"2025-04-29"},{"Chassi":"LC0CE4CB2S0018429","Modelo":"DOLPHIN PLUS","Data":"2025-01-28"},{"Chassi":"LC0CE4CB2S0019483","Modelo":"DOLPHIN PLUS","Data":"2025-05-02"},{"Chassi":"LC0CE4CB2S4001283","Modelo":"YUAN PRO EV","Data":"2025-03-15"},{"Chassi":"LC0CE4CB2S4001526","Modelo":"YUAN PRO EV","Data":"2025-04-29"},{"Chassi":"LC0CE4CB2S4002501","Modelo":"YUAN PRO EV","Data":"2025-03-18"},{"Chassi":"LC0CE4CB2S4003115","Modelo":"YUAN PRO EV","Data":"2025-03-17"},{"Chassi":"LC0CE4CB3S0014695","Modelo":"DOLPHIN PLUS","Data":"2025-05-02"},{"Chassi":"LC0CE4CB3S0015684","Modelo":"DOLPHIN PLUS","Data":"2024-12-12"},{"Chassi":"LC0CE4CB3S0015782","Modelo":"DOLPHIN PLUS","Data":"2025-06-12"},{"Chassi":"LC0CE4CB3S0016401","Modelo":"DOLPHIN PLUS","Data":"2025-02-21"},{"Chassi":"LC0CE4CB3S0017869","Modelo":"DOLPHIN PLUS","Data":"2025-01-24"},{"Chassi":"LC0CE4CB3S0018455","Modelo":"DOLPHIN PLUS","Data":"2025-04-29"},{"Chassi":"LC0CE4CB3S0019640","Modelo":"DOLPHIN PLUS","Data":"2025-04-30"},{"Chassi":"LC0CE4CB4S0014754","Modelo":"DOLPHIN PLUS","Data":"2025-02-21"},{"Chassi":"LC0CE4CB4S0015791","Modelo":"DOLPHIN PLUS","Data":"2025-04-30"},{"Chassi":"LC0CE4CB4S0017833","Modelo":"DOLPHIN PLUS","Data":"2025-05-02"},{"Chassi":"LC0CE4CB4S0017850","Modelo":"DOLPHIN PLUS","Data":"2025-04-30"},{"Chassi":"LC0CE4CB4S0017895","Modelo":"DOLPHIN PLUS","Data":"2025-03-14"},{"Chassi":"LC0CE4CB4S0017900","Modelo":"DOLPHIN PLUS","Data":"2025-04-29"},{"Chassi":"LC0CE4CB5S0007294","Modelo":"DOLPHIN PLUS","Data":"2024-11-28"},{"Chassi":"LC0CE4CB5S0014729","Modelo":"DOLPHIN PLUS","Data":"2025-04-30"},{"Chassi":"LC0CE4CB5S0015654","Modelo":"DOLPHIN PLUS","Data":"2025-02-06"},{"Chassi":"LC0CE4CB5S0016528","Modelo":"DOLPHIN PLUS","Data":"2025-01-28"},{"Chassi":"LC0CE4CB5S4003335","Modelo":"YUAN PRO EV","Data":"2025-01-14"},{"Chassi":"LC0CE4CB6S0013380","Modelo":"DOLPHIN PLUS","Data":"2025-04-30"},{"Chassi":"LC0CE4CB6S0014920","Modelo":"DOLPHIN PLUS","Data":"2025-05-09"},{"Chassi":"LC0CE4CB6S0015811","Modelo":"DOLPHIN PLUS","Data":"2025-01-28"},{"Chassi":"LC0CE4CB6S0017851","Modelo":"DOLPHIN PLUS","Data":"2025-01-28"},{"Chassi":"LC0CE4CB6S0019485","Modelo":"DOLPHIN PLUS","Data":"2025-04-29"},{"Chassi":"LC0CE4CB6S0019504","Modelo":"DOLPHIN PLUS","Data":"2025-05-02"},{"Chassi":"LC0CE4CB6S0019650","Modelo":"DOLPHIN PLUS","Data":"2025-01-24"},{"Chassi":"LC0CE4CB7S0004817","Modelo":"YUAN PLUS EV","Data":"2024-11-07"},{"Chassi":"LC0CE4CB7S0015803","Modelo":"DOLPHIN PLUS","Data":"2025-01-28"},{"Chassi":"LC0CE4CB7S0018457","Modelo":"DOLPHIN PLUS","Data":"2025-05-07"},{"Chassi":"LC0CE4CB7S0019463","Modelo":"DOLPHIN PLUS","Data":"2025-04-04"},{"Chassi":"LC0CE4CB7S4002204","Modelo":"YUAN PRO EV","Data":"2025-03-14"},{"Chassi":"LC0CE4CB7S4002462","Modelo":"YUAN PRO EV","Data":"2025-04-14"},{"Chassi":"LC0CE4CB8S0018421","Modelo":"DOLPHIN PLUS","Data":"2025-04-29"},{"Chassi":"LC0CE4CB8S0019505","Modelo":"DOLPHIN PLUS","Data":"2025-01-27"},{"Chassi":"LC0CE4CB8S4001787","Modelo":"YUAN PRO EV","Data":"2025-03-18"},{"Chassi":"LC0CE4CB9S0013230","Modelo":"DOLPHIN PLUS","Data":"2025-03-11"},{"Chassi":"LC0CE4CB9S0014748","Modelo":"DOLPHIN PLUS","Data":"2025-05-02"},{"Chassi":"LC0CE4CB9S0016435","Modelo":"DOLPHIN PLUS","Data":"2025-05-05"},{"Chassi":"LC0CE4CB9S0017830","Modelo":"DOLPHIN PLUS","Data":"2025-04-30"},{"Chassi":"LC0CE4CB9S0019688","Modelo":"DOLPHIN PLUS","Data":"2025-01-28"},{"Chassi":"LC0CE4CB9S4002253","Modelo":"YUAN PRO EV","Data":"2025-04-09"},{"Chassi":"LC0CE4CB9S4002334","Modelo":"YUAN PRO EV","Data":"2025-06-12"},{"Chassi":"LC0CE4CB9S4002415","Modelo":"YUAN PRO EV","Data":"2025-03-14"},{"Chassi":"LC0CE4CBXS0015827","Modelo":"DOLPHIN PLUS","Data":"2025-02-04"},{"Chassi":"LC0CE4CBXS0015830","Modelo":"DOLPHIN PLUS","Data":"2025-02-27"},{"Chassi":"LC0CE4CBXS0019490","Modelo":"DOLPHIN PLUS","Data":"2025-01-28"},{"Chassi":"LC0CE4CBXS4002956","Modelo":"YUAN PRO EV","Data":"2025-04-11"},{"Chassi":"LC0CF4CD0S0021800","Modelo":"TAN EV","Data":"2025-03-11"},{"Chassi":"LC0CF4CD1S0021790","Modelo":"TAN EV","Data":"2025-02-17"},{"Chassi":"LC0CF4CD3S0021774","Modelo":"TAN EV","Data":"2025-02-14"},{"Chassi":"LC0CF4CD5S0021727","Modelo":"TAN EV","Data":"2025-04-15"},{"Chassi":"LC0CF4CD9S0021570","Modelo":"TAN EV","Data":"2024-08-02"},{"Chassi":"LGXC74C40S0040731","Modelo":"SONG PLUS GS DM","Data":"2025-03-07"},{"Chassi":"LGXC74C40S0041605","Modelo":"SONG PLUS GS DM","Data":"2024-10-10"},{"Chassi":"LGXC74C40T0034669","Modelo":"SONG PLUS GS DM","Data":"2025-06-27"},{"Chassi":"LGXC74C40T0040035","Modelo":"SONG PLUS GS DM","Data":"2025-08-27"},{"Chassi":"LGXC74C41S0016650","Modelo":"SONG PLUS GS DM","Data":"2024-10-01"},{"Chassi":"LGXC74C41S0019564","Modelo":"SONG PLUS GS DM","Data":"2024-10-09"},{"Chassi":"LGXC74C41S0020455","Modelo":"SONG PLUS GS DM","Data":"2024-10-17"},{"Chassi":"LGXC74C41T0035135","Modelo":"SONG PLUS GS DM","Data":"2025-06-30"},{"Chassi":"LGXC74C41T0041792","Modelo":"SONG PLUS GS DM","Data":"2025-07-14"},{"Chassi":"LGXC74C41T0042814","Modelo":"SONG PLUS GS DM","Data":"2025-07-25"},{"Chassi":"LGXC74C42S0024496","Modelo":"SONG PLUS GS DM","Data":"2024-10-22"},{"Chassi":"LGXC74C42S0040701","Modelo":"SONG PLUS GS DM","Data":"2025-02-12"},{"Chassi":"LGXC74C42S0046479","Modelo":"SONG PLUS GS DM","Data":"2024-10-30"},{"Chassi":"LGXC74C42T0035094","Modelo":"SONG PLUS GS DM","Data":"2025-07-03"},{"Chassi":"LGXC74C42T0035161","Modelo":"SONG PLUS GS DM","Data":"2025-08-05"},{"Chassi":"LGXC74C42T0038500","Modelo":"SONG PLUS GS DM","Data":"2025-09-01"},{"Chassi":"LGXC74C42T0038822","Modelo":"SONG PLUS GS DM","Data":"2025-07-15"},{"Chassi":"LGXC74C42T0039999","Modelo":"SONG PLUS GS DM","Data":"2025-07-15"},{"Chassi":"LGXC74C43T0034763","Modelo":"SONG PLUS GS DM","Data":"2025-07-02"},{"Chassi":"LGXC74C43T0035167","Modelo":"SONG PLUS GS DM","Data":"2025-07-23"},{"Chassi":"LGXC74C44S0028033","Modelo":"SONG PLUS GS DM","Data":"2024-10-21"},{"Chassi":"LGXC74C44S0028064","Modelo":"SONG PLUS GS DM","Data":"2025-02-11"},{"Chassi":"LGXC74C44T0040006","Modelo":"SONG PLUS GS DM","Data":"2025-07-02"},{"Chassi":"LGXC74C44T0042239","Modelo":"SONG PLUS GS DM","Data":"2025-07-15"},{"Chassi":"LGXC74C45S0042717","Modelo":"SONG PLUS GS DM","Data":"2024-10-04"},{"Chassi":"LGXC74C45T0035543","Modelo":"SONG PLUS GS DM","Data":"2025-06-30"},{"Chassi":"LGXC74C45T0038801","Modelo":"SONG PLUS GS DM","Data":"2025-07-08"},{"Chassi":"LGXC74C45T0041035","Modelo":"SONG PLUS GS DM","Data":"2025-07-02"},{"Chassi":"LGXC74C45T0041116","Modelo":"SONG PLUS GS DM","Data":"2025-07-15"},{"Chassi":"LGXC74C45T0042184","Modelo":"SONG PLUS GS DM","Data":"2025-10-10"},{"Chassi":"LGXC74C46S0041611","Modelo":"SONG PLUS GS DM","Data":"2024-10-07"},{"Chassi":"LGXC74C46S0043357","Modelo":"SONG PLUS GS DM","Data":"2024-10-21"},{"Chassi":"LGXC74C46S0045867","Modelo":"SONG PLUS GS DM","Data":"2025-03-31"},{"Chassi":"LGXC74C46S0045870","Modelo":"SONG PLUS GS DM","Data":"2025-02-17"},{"Chassi":"LGXC74C46S0048056","Modelo":"SONG PLUS GS DM","Data":"2024-10-03"},{"Chassi":"LGXC74C46T0034689","Modelo":"SONG PLUS GS DM","Data":"2025-07-15"},{"Chassi":"LGXC74C46T0041013","Modelo":"SONG PLUS GS DM","Data":"2025-09-15"},{"Chassi":"LGXC74C46T0041027","Modelo":"SONG PLUS GS DM","Data":"2025-07-23"},{"Chassi":"LGXC74C46T0041075","Modelo":"SONG PLUS GS DM","Data":"2025-08-29"},{"Chassi":"LGXC74C46T0042274","Modelo":"SONG PLUS GS DM","Data":"2025-07-15"},{"Chassi":"LGXC74C46T0042825","Modelo":"SONG PLUS GS DM","Data":"2025-07-10"},{"Chassi":"LGXC74C47S0025823","Modelo":"SONG PLUS GS DM","Data":"2024-12-12"},{"Chassi":"LGXC74C47S0030357","Modelo":"SONG PLUS GS DM","Data":"2025-03-07"},{"Chassi":"LGXC74C47S0043352","Modelo":"SONG PLUS GS DM","Data":"2025-05-08"},{"Chassi":"LGXC74C47S0045781","Modelo":"SONG PLUS GS DM","Data":"2025-02-11"},{"Chassi":"LGXC74C47T0035057","Modelo":"SONG PLUS GS DM","Data":"2025-09-03"},{"Chassi":"LGXC74C47T0035611","Modelo":"SONG PLUS GS DM","Data":"2025-07-01"},{"Chassi":"LGXC74C47T0038914","Modelo":"SONG PLUS GS DM","Data":"2025-07-14"},{"Chassi":"LGXC74C47T0039996","Modelo":"SONG PLUS GS DM","Data":"2025-07-02"},{"Chassi":"LGXC74C47T0042803","Modelo":"SONG PLUS GS DM","Data":"2025-07-04"},{"Chassi":"LGXC74C47T0042851","Modelo":"SONG PLUS GS DM","Data":"2025-06-26"},{"Chassi":"LGXC74C48S0009162","Modelo":"SONG PLUS GS DM","Data":"2025-02-06"},{"Chassi":"LGXC74C48S0017052","Modelo":"SONG PLUS GS DM","Data":"2024-11-18"},{"Chassi":"LGXC74C48S0030237","Modelo":"SONG PLUS GS DM","Data":"2024-10-15"},{"Chassi":"LGXC74C48S0033476","Modelo":"SONG PLUS GS DM","Data":"2024-12-11"},{"Chassi":"LGXC74C48S0045823","Modelo":"SONG PLUS GS DM","Data":"2025-03-07"},{"Chassi":"LGXC74C48S0046437","Modelo":"SONG PLUS GS DM","Data":"2025-02-17"},{"Chassi":"LGXC74C48S0048043","Modelo":"SONG PLUS GS DM","Data":"2025-01-24"},{"Chassi":"LGXC74C48T0023970","Modelo":"SONG PLUS GS DM","Data":"2025-07-18"},{"Chassi":"LGXC74C48T0035486","Modelo":"SONG PLUS GS DM","Data":"2025-06-23"},{"Chassi":"LGXC74C48T0035584","Modelo":"SONG PLUS GS DM","Data":"2025-06-27"},{"Chassi":"LGXC74C48T0040073","Modelo":"SONG PLUS GS DM","Data":"2025-07-03"},{"Chassi":"LGXC74C48T0042289","Modelo":"SONG PLUS GS DM","Data":"2025-07-04"},{"Chassi":"LGXC74C49S0012765","Modelo":"SONG PLUS GS DM","Data":"2024-12-29"},{"Chassi":"LGXC74C49S0028853","Modelo":"SONG PLUS GS DM","Data":"2024-10-21"},{"Chassi":"LGXC74C49S0041618","Modelo":"SONG PLUS GS DM","Data":"2024-10-03"},{"Chassi":"LGXC74C49S0041683","Modelo":"SONG PLUS GS DM","Data":"2024-09-25"},{"Chassi":"LGXC74C49S0045748","Modelo":"SONG PLUS GS DM","Data":"2024-12-06"},{"Chassi":"LGXC74C49T0038512","Modelo":"SONG PLUS GS DM","Data":"2026-02-06"},{"Chassi":"LGXC74C49T0040115","Modelo":"SONG PLUS GS DM","Data":"2025-07-29"},{"Chassi":"LGXC74C49T0042818","Modelo":"SONG PLUS GS DM","Data":"2025-07-18"},{"Chassi":"LGXC74C4XS0009292","Modelo":"SONG PLUS GS DM","Data":"2024-10-09"},{"Chassi":"LGXC74C4XS0010796","Modelo":"SONG PLUS GS DM","Data":"2024-10-01"},{"Chassi":"LGXC74C4XS0017134","Modelo":"SONG PLUS GS DM","Data":"2025-04-09"},{"Chassi":"LGXC74C4XS0046357","Modelo":"SONG PLUS GS DM","Data":"2025-03-07"},{"Chassi":"LGXC74C4XT0034405","Modelo":"SONG PLUS GS DM","Data":"2025-06-30"},{"Chassi":"LGXC74C4XT0035103","Modelo":"SONG PLUS GS DM","Data":"2025-07-03"},{"Chassi":"LGXC74C4XT0040964","Modelo":"SONG PLUS GS DM","Data":"2025-07-14"},{"Chassi":"LGXC74C4XT0042097","Modelo":"SONG PLUS GS DM","Data":"2025-07-15"},{"Chassi":"LGXCD4C42T0040174","Modelo":"SONG PLUS PREMIUM DM","Data":"2025-07-01"},{"Chassi":"LGXCD4C49T0040334","Modelo":"SONG PLUS PREMIUM DM","Data":"2025-07-03"},{"Chassi":"LGXCD4C4XT0037507","Modelo":"SONG PLUS PREMIUM DM","Data":"2025-07-01"},{"Chassi":"LGXCE4CC0S0006110","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-09-05"},{"Chassi":"LGXCE4CC0S0015115","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-05-28"},{"Chassi":"LGXCE4CC0S0015406","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-05-21"},{"Chassi":"LGXCE4CC0S0039446","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-11-21"},{"Chassi":"LGXCE4CC0S0039754","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-11-21"},{"Chassi":"LGXCE4CC0S0040936","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-04"},{"Chassi":"LGXCE4CC0S0041052","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-04-30"},{"Chassi":"LGXCE4CC0S0041195","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-26"},{"Chassi":"LGXCE4CC0S0041956","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-12-10"},{"Chassi":"LGXCE4CC0S0042203","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-04"},{"Chassi":"LGXCE4CC0S0042864","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-04-03"},{"Chassi":"LGXCE4CC0S0043268","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-22"},{"Chassi":"LGXCE4CC0S0044131","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-04"},{"Chassi":"LGXCE4CC0S0044677","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-27"},{"Chassi":"LGXCE4CC0S0045280","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-24"},{"Chassi":"LGXCE4CC0S0046719","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-04-03"},{"Chassi":"LGXCE4CC0S0048969","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-22"},{"Chassi":"LGXCE4CC0S0051032","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-06-22"},{"Chassi":"LGXCE4CC0S0052262","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-04"},{"Chassi":"LGXCE4CC0S0052486","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-09-05"},{"Chassi":"LGXCE4CC0T0033437","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-06-30"},{"Chassi":"LGXCE4CC0T0045135","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-06-30"},{"Chassi":"LGXCE4CC1S0010151","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-12-12"},{"Chassi":"LGXCE4CC1S0012157","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-09-04"},{"Chassi":"LGXCE4CC1S0013356","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-09-04"},{"Chassi":"LGXCE4CC1S0013373","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-09-05"},{"Chassi":"LGXCE4CC1S0017763","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-09-04"},{"Chassi":"LGXCE4CC1S0018945","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-12-12"},{"Chassi":"LGXCE4CC1S0020792","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-09-04"},{"Chassi":"LGXCE4CC1S0025653","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-10-24"},{"Chassi":"LGXCE4CC1S0039763","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-12-09"},{"Chassi":"LGXCE4CC1S0042419","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-21"},{"Chassi":"LGXCE4CC1S0042565","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-12-09"},{"Chassi":"LGXCE4CC1S0042646","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-05"},{"Chassi":"LGXCE4CC1S0043215","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-04"},{"Chassi":"LGXCE4CC1S0044204","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-12-09"},{"Chassi":"LGXCE4CC1S0044588","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-10-10"},{"Chassi":"LGXCE4CC1S0044848","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-05"},{"Chassi":"LGXCE4CC1S0049466","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-06-28"},{"Chassi":"LGXCE4CC1S0049905","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-07-03"},{"Chassi":"LGXCE4CC2S0018971","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-06-20"},{"Chassi":"LGXCE4CC2S0022776","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2025-01-14"},{"Chassi":"LGXCE4CC2S0032823","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-09-05"},{"Chassi":"LGXCE4CC2S0037911","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-07-22"},{"Chassi":"LGXCE4CC2S0038489","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-12-23"},{"Chassi":"LGXCE4CC2S0038525","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-04"},{"Chassi":"LGXCE4CC2S0040002","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-09-04"},{"Chassi":"LGXCE4CC2S0041926","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-10-15"},{"Chassi":"LGXCE4CC2S0042901","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-10-02"},{"Chassi":"LGXCE4CC2S0043269","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-11-26"},{"Chassi":"LGXCE4CC2S0043319","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-12-09"},{"Chassi":"LGXCE4CC2S0044129","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-23"},{"Chassi":"LGXCE4CC2S0045474","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-22"},{"Chassi":"LGXCE4CC2T0044181","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-07-01"},{"Chassi":"LGXCE4CC3S0017926","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-09-04"},{"Chassi":"LGXCE4CC3S0023130","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-09-05"},{"Chassi":"LGXCE4CC3S0027050","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-06-11"},{"Chassi":"LGXCE4CC3S0037903","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-07-22"},{"Chassi":"LGXCE4CC3S0039747","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-07"},{"Chassi":"LGXCE4CC3S0039828","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-10-03"},{"Chassi":"LGXCE4CC3S0042339","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-25"},{"Chassi":"LGXCE4CC3S0042647","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-04-29"},{"Chassi":"LGXCE4CC3S0042843","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-20"},{"Chassi":"LGXCE4CC3S0042938","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-04"},{"Chassi":"LGXCE4CC3S0043653","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-04-15"},{"Chassi":"LGXCE4CC3S0046729","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-10-16"},{"Chassi":"LGXCE4CC3S0046763","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-04-02"},{"Chassi":"LGXCE4CC3S0052188","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-10-11"},{"Chassi":"LGXCE4CC3T0044075","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-06-30"},{"Chassi":"LGXCE4CC4S0025467","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-12-17"},{"Chassi":"LGXCE4CC4S0038901","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-04-07"},{"Chassi":"LGXCE4CC4S0039949","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-26"},{"Chassi":"LGXCE4CC4S0040003","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-12-12"},{"Chassi":"LGXCE4CC4S0040258","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-04"},{"Chassi":"LGXCE4CC4S0041863","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-12-17"},{"Chassi":"LGXCE4CC4S0042012","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-09-24"},{"Chassi":"LGXCE4CC4S0042222","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-16"},{"Chassi":"LGXCE4CC4S0042236","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-10-31"},{"Chassi":"LGXCE4CC4S0042687","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-23"},{"Chassi":"LGXCE4CC4S0043192","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-26"},{"Chassi":"LGXCE4CC4S0043497","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-10-28"},{"Chassi":"LGXCE4CC4S0044083","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-04-30"},{"Chassi":"LGXCE4CC4S0051051","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-07-05"},{"Chassi":"LGXCE4CC5S0019029","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-10-16"},{"Chassi":"LGXCE4CC5S0020682","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-06-18"},{"Chassi":"LGXCE4CC5S0039801","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-06"},{"Chassi":"LGXCE4CC5S0041046","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-28"},{"Chassi":"LGXCE4CC5S0041824","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-22"},{"Chassi":"LGXCE4CC5S0042021","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-22"},{"Chassi":"LGXCE4CC5S0042309","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-12-12"},{"Chassi":"LGXCE4CC5S0043508","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-22"},{"Chassi":"LGXCE4CC5S0043590","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-22"},{"Chassi":"LGXCE4CC5S0045517","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-22"},{"Chassi":"LGXCE4CC5S0049535","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-06-18"},{"Chassi":"LGXCE4CC5S0049826","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-10-31"},{"Chassi":"LGXCE4CC5S0050393","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-06-25"},{"Chassi":"LGXCE4CC5S0051074","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-06-20"},{"Chassi":"LGXCE4CC5S0052323","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-06-15"},{"Chassi":"LGXCE4CC6S0009657","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-10-16"},{"Chassi":"LGXCE4CC6S0011117","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-09-04"},{"Chassi":"LGXCE4CC6S0017676","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2025-04-16"},{"Chassi":"LGXCE4CC6S0019041","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-06-14"},{"Chassi":"LGXCE4CC6S0019329","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-06-13"},{"Chassi":"LGXCE4CC6S0040276","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-25"},{"Chassi":"LGXCE4CC6S0041010","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-09-28"},{"Chassi":"LGXCE4CC6S0041296","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-05-27"},{"Chassi":"LGXCE4CC6S0041962","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-11-26"},{"Chassi":"LGXCE4CC6S0042139","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-04-09"},{"Chassi":"LGXCE4CC6S0042528","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-30"},{"Chassi":"LGXCE4CC6S0042965","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-11-26"},{"Chassi":"LGXCE4CC6S0043484","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-10-04"},{"Chassi":"LGXCE4CC6S0044215","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-11-18"},{"Chassi":"LGXCE4CC6S0044666","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-11-22"},{"Chassi":"LGXCE4CC6S0044876","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-16"},{"Chassi":"LGXCE4CC6S0046644","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-10-30"},{"Chassi":"LGXCE4CC6S0048961","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-06-18"},{"Chassi":"LGXCE4CC6S0050130","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-06-17"},{"Chassi":"LGXCE4CC6T0043695","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-06-26"},{"Chassi":"LGXCE4CC7S0019274","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-05-24"},{"Chassi":"LGXCE4CC7S0026239","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-09-04"},{"Chassi":"LGXCE4CC7S0027052","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-06-12"},{"Chassi":"LGXCE4CC7S0028556","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2025-02-27"},{"Chassi":"LGXCE4CC7S0032798","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-11-22"},{"Chassi":"LGXCE4CC7S0038052","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-09-24"},{"Chassi":"LGXCE4CC7S0039945","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-04-07"},{"Chassi":"LGXCE4CC7S0042876","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-12-09"},{"Chassi":"LGXCE4CC7S0043624","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-23"},{"Chassi":"LGXCE4CC7S0043655","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-21"},{"Chassi":"LGXCE4CC7S0044465","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-27"},{"Chassi":"LGXCE4CC7S0046703","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-11-23"},{"Chassi":"LGXCE4CC7S0049116","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-10-10"},{"Chassi":"LGXCE4CC7S0049178","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-09-04"},{"Chassi":"LGXCE4CC7S0049990","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-06-18"},{"Chassi":"LGXCE4CC7S0051447","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-03-28"},{"Chassi":"LGXCE4CC7S0051707","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-09-05"},{"Chassi":"LGXCE4CC7S0051819","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-09-05"},{"Chassi":"LGXCE4CC7T0037131","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-06-30"},{"Chassi":"LGXCE4CC7T0039820","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-07-02"},{"Chassi":"LGXCE4CC8S0012107","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-09-05"},{"Chassi":"LGXCE4CC8S0014052","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-11-21"},{"Chassi":"LGXCE4CC8S0019414","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-09-04"},{"Chassi":"LGXCE4CC8S0025715","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-10-30"},{"Chassi":"LGXCE4CC8S0039517","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-20"},{"Chassi":"LGXCE4CC8S0040151","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-27"},{"Chassi":"LGXCE4CC8S0042398","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-22"},{"Chassi":"LGXCE4CC8S0042630","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-11-18"},{"Chassi":"LGXCE4CC8S0042918","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-04"},{"Chassi":"LGXCE4CC8S0043213","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-04"},{"Chassi":"LGXCE4CC8S0043339","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-04"},{"Chassi":"LGXCE4CC8S0043602","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-21"},{"Chassi":"LGXCE4CC8S0044586","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-05"},{"Chassi":"LGXCE4CC8S0050288","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-11-08"},{"Chassi":"LGXCE4CC8S0050369","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-06-26"},{"Chassi":"LGXCE4CC8S0050730","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-03-13"},{"Chassi":"LGXCE4CC8S0051196","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-11-09"},{"Chassi":"LGXCE4CC9S0027134","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-09-04"},{"Chassi":"LGXCE4CC9S0037405","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-12-09"},{"Chassi":"LGXCE4CC9S0039512","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-26"},{"Chassi":"LGXCE4CC9S0040157","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-11-26"},{"Chassi":"LGXCE4CC9S0040935","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-11-11"},{"Chassi":"LGXCE4CC9S0041289","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-03"},{"Chassi":"LGXCE4CC9S0041843","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-04-09"},{"Chassi":"LGXCE4CC9S0043589","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-25"},{"Chassi":"LGXCE4CC9S0044600","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-03-13"},{"Chassi":"LGXCE4CC9S0045343","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-22"},{"Chassi":"LGXCE4CC9S0046203","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-10-22"},{"Chassi":"LGXCE4CC9S0046265","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-10-07"},{"Chassi":"LGXCE4CC9S0049165","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-06-20"},{"Chassi":"LGXCE4CC9T0039480","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-06-30"},{"Chassi":"LGXCE4CC9T0039799","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-06-30"},{"Chassi":"LGXCE4CC9T0045151","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-07-01"},{"Chassi":"LGXCE4CCXS0011282","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-09-05"},{"Chassi":"LGXCE4CCXS0019057","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2025-01-21"},{"Chassi":"LGXCE4CCXS0019883","Modelo":"DOLPHIN MINI\u00a0GS (4 SEATS)","Data":"2024-06-14"},{"Chassi":"LGXCE4CCXS0034660","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-04-05"},{"Chassi":"LGXCE4CCXS0037896","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-22"},{"Chassi":"LGXCE4CCXS0040037","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-12-09"},{"Chassi":"LGXCE4CCXS0040149","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-23"},{"Chassi":"LGXCE4CCXS0040961","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-22"},{"Chassi":"LGXCE4CCXS0042063","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-04"},{"Chassi":"LGXCE4CCXS0042225","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-13"},{"Chassi":"LGXCE4CCXS0042595","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-11-14"},{"Chassi":"LGXCE4CCXS0042631","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-22"},{"Chassi":"LGXCE4CCXS0042872","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-31"},{"Chassi":"LGXCE4CCXS0043651","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-12-06"},{"Chassi":"LGXCE4CCXS0044900","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-17"},{"Chassi":"LGXCE4CCXS0045285","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-22"},{"Chassi":"LGXCE4CCXS0045433","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-04"},{"Chassi":"LGXCE4CCXS0046789","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-10-17"},{"Chassi":"LGXCE4CCXS0049207","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-01-30"},{"Chassi":"LGXCE4CCXS0049322","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-04"},{"Chassi":"LGXCE4CCXS0050650","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2024-06-15"},{"Chassi":"LGXCE4CCXS0052205","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-02-25"},{"Chassi":"LGXCE4CCXT0039665","Modelo":"DOLPHIN MINI\u00a0GS (5 SEATS)","Data":"2025-06-27"},{"Chassi":"LGXCF6CD0S2002273","Modelo":"SEAL EV","Data":"2024-07-29"},{"Chassi":"LGXCF6CD0S2003519","Modelo":"SEAL EV","Data":"2025-01-22"},{"Chassi":"LGXCF6CD0S2005061","Modelo":"SEAL EV","Data":"2026-01-13"},{"Chassi":"LGXCF6CD0S2005612","Modelo":"SEAL EV","Data":"2025-04-10"},{"Chassi":"LGXCF6CD0S2005755","Modelo":"SEAL EV","Data":"2025-04-15"},{"Chassi":"LGXCF6CD1S2002525","Modelo":"SEAL EV","Data":"2025-05-28"},{"Chassi":"LGXCF6CD1S2004548","Modelo":"SEAL EV","Data":"2025-01-22"},{"Chassi":"LGXCF6CD1S2004579","Modelo":"SEAL EV","Data":"2024-11-25"},{"Chassi":"LGXCF6CD1S2004713","Modelo":"SEAL EV","Data":"2025-11-05"},{"Chassi":"LGXCF6CD1S2004971","Modelo":"SEAL EV","Data":"2024-12-03"},{"Chassi":"LGXCF6CD2S2001464","Modelo":"SEAL EV","Data":"2025-02-18"},{"Chassi":"LGXCF6CD2S2003330","Modelo":"SEAL EV","Data":"2025-10-06"},{"Chassi":"LGXCF6CD2S2004235","Modelo":"SEAL EV","Data":"2025-04-28"},{"Chassi":"LGXCF6CD2S2005868","Modelo":"SEAL EV","Data":"2024-12-05"},{"Chassi":"LGXCF6CD3S2001649","Modelo":"SEAL EV","Data":"2025-02-17"},{"Chassi":"LGXCF6CD3S2003479","Modelo":"SEAL EV","Data":"2024-11-11"},{"Chassi":"LGXCF6CD3S2005054","Modelo":"SEAL EV","Data":"2025-02-04"},{"Chassi":"LGXCF6CD3S2005619","Modelo":"SEAL EV","Data":"2025-04-28"},{"Chassi":"LGXCF6CD3S2005684","Modelo":"SEAL EV","Data":"2025-03-13"},{"Chassi":"LGXCF6CD3S2005846","Modelo":"SEAL EV","Data":"2025-04-10"},{"Chassi":"LGXCF6CD4S2001613","Modelo":"SEAL EV","Data":"2025-05-02"},{"Chassi":"LGXCF6CD4S2001742","Modelo":"SEAL EV","Data":"2025-03-06"},{"Chassi":"LGXCF6CD4S2003507","Modelo":"SEAL EV","Data":"2025-11-05"},{"Chassi":"LGXCF6CD4S2004236","Modelo":"SEAL EV","Data":"2025-07-21"},{"Chassi":"LGXCF6CD4S2004723","Modelo":"SEAL EV","Data":"2024-12-29"},{"Chassi":"LGXCF6CD4S2005676","Modelo":"SEAL EV","Data":"2025-04-23"},{"Chassi":"LGXCF6CD4S2005760","Modelo":"SEAL EV","Data":"2025-08-19"},{"Chassi":"LGXCF6CD5S2001684","Modelo":"SEAL EV","Data":"2025-09-16"},{"Chassi":"LGXCF6CD5S2001703","Modelo":"SEAL EV","Data":"2025-03-25"},{"Chassi":"LGXCF6CD5S2004293","Modelo":"SEAL EV","Data":"2025-05-02"},{"Chassi":"LGXCF6CD5S2004701","Modelo":"SEAL EV","Data":"2024-11-22"},{"Chassi":"LGXCF6CD5S2004973","Modelo":"SEAL EV","Data":"2024-11-27"},{"Chassi":"LGXCF6CD5S2005590","Modelo":"SEAL EV","Data":"2025-04-07"},{"Chassi":"LGXCF6CD5S2005654","Modelo":"SEAL EV","Data":"2025-04-22"},{"Chassi":"LGXCF6CD5S2005671","Modelo":"SEAL EV","Data":"2025-02-20"},{"Chassi":"LGXCF6CD6S2002049","Modelo":"SEAL EV","Data":"2025-04-23"},{"Chassi":"LGXCF6CD6S2002116","Modelo":"SEAL EV","Data":"2025-07-15"},{"Chassi":"LGXCF6CD6S2003525","Modelo":"SEAL EV","Data":"2025-01-22"},{"Chassi":"LGXCF6CD6S2003816","Modelo":"SEAL EV","Data":"2025-01-22"},{"Chassi":"LGXCF6CD6S2003962","Modelo":"SEAL EV","Data":"2025-02-12"},{"Chassi":"LGXCF6CD6S2004724","Modelo":"SEAL EV","Data":"2025-02-04"},{"Chassi":"LGXCF6CD6S2004979","Modelo":"SEAL EV","Data":"2025-05-02"},{"Chassi":"LGXCF6CD7S2001816","Modelo":"SEAL EV","Data":"2025-04-15"},{"Chassi":"LGXCF6CD7S2001962","Modelo":"SEAL EV","Data":"2024-10-22"},{"Chassi":"LGXCF6CD7S2002058","Modelo":"SEAL EV","Data":"2025-07-15"},{"Chassi":"LGXCF6CD7S2004196","Modelo":"SEAL EV","Data":"2025-02-12"},{"Chassi":"LGXCF6CD7S2004389","Modelo":"SEAL EV","Data":"2024-12-03"},{"Chassi":"LGXCF6CD7S2004702","Modelo":"SEAL EV","Data":"2025-02-28"},{"Chassi":"LGXCF6CD7S2004828","Modelo":"SEAL EV","Data":"2025-02-20"},{"Chassi":"LGXCF6CD7S2005655","Modelo":"SEAL EV","Data":"2025-03-12"},{"Chassi":"LGXCF6CD7S2005770","Modelo":"SEAL EV","Data":"2025-03-14"},{"Chassi":"LGXCF6CD8S2001503","Modelo":"SEAL EV","Data":"2025-04-22"},{"Chassi":"LGXCF6CD8S2002389","Modelo":"SEAL EV","Data":"2024-11-27"},{"Chassi":"LGXCF6CD8S2002957","Modelo":"SEAL EV","Data":"2024-11-27"},{"Chassi":"LGXCF6CD8S2003283","Modelo":"SEAL EV","Data":"2025-02-12"},{"Chassi":"LGXCF6CD8S2003915","Modelo":"SEAL EV","Data":"2025-02-12"},{"Chassi":"LGXCF6CD8S2004238","Modelo":"SEAL EV","Data":"2025-01-22"},{"Chassi":"LGXCF6CD9S2004894","Modelo":"SEAL EV","Data":"2025-02-04"},{"Chassi":"LGXCF6CD9S2004927","Modelo":"SEAL EV","Data":"2025-02-20"},{"Chassi":"LGXCF6CD9S2005687","Modelo":"SEAL EV","Data":"2025-04-07"},{"Chassi":"LGXCF6CDXS2001535","Modelo":"SEAL EV","Data":"2025-02-14"},{"Chassi":"LGXCF6CDXS2001597","Modelo":"SEAL EV","Data":"2025-03-11"},{"Chassi":"LGXCF6CDXS2003902","Modelo":"SEAL EV","Data":"2025-02-12"},{"Chassi":"LGXCF6CDXS2004791","Modelo":"SEAL EV","Data":"2024-12-03"},{"Chassi":"LGXCF6CDXS2004841","Modelo":"SEAL EV","Data":"2024-12-09"},{"Chassi":"LGXCF6CDXS2004905","Modelo":"SEAL EV","Data":"2024-11-22"},{"Chassi":"LGXCF6CDXS2004936","Modelo":"SEAL EV","Data":"2025-01-22"}]};
+
+// State
+let db = {};  // brand -> array of {Chassi, Modelo, Data, id}
+let nextId = 1;
+let currentTab = 'ALL';
+let filteredData = [];
+let pendingImport = null;
+let pendingDelete = null;
+let currentPage = 1;
+const PAGE_SIZE = 50;
+
+const BRANDS = ['ALL','TOYOTA','VW','GM','HYUNDAI','BYD'];
+const BRAND_LABELS = { ALL: 'Geral', TOYOTA: 'Toyota', VW: 'Volkswagen', GM: 'GM', HYUNDAI: 'Hyundai', BYD: 'BYD' };
+const BRAND_COLORS = { TOYOTA: 'toyota', VW: 'vw', GM: 'gm', HYUNDAI: 'hyundai', BYD: 'byd' };
+
+function initDB() {
+  Object.entries(SEED_DATA).forEach(([brand, rows]) => {
+    db[brand] = rows.map(r => ({ ...r, id: nextId++ }));
+  });
+}
+
+function getAllRows() {
+  return BRANDS.filter(b => b !== 'ALL').flatMap(b => (db[b] || []).map(r => ({ ...r, brand: b })));
+}
+
+function getCurrentRows() {
+  if (currentTab === 'ALL') return getAllRows();
+  return (db[currentTab] || []).map(r => ({ ...r, brand: currentTab }));
+}
+
+// =========== RENDER ===========
+function renderStats() {
+  const row = document.getElementById('stats-row');
+  const all = getAllRows();
+  const html = [
+    { key: 'total', label: 'Total Geral', count: all.length, icon: '🚗', cls: 'total' },
+    ...BRANDS.filter(b=>b!=='ALL').map(b => ({ key: b, label: BRAND_LABELS[b], count: (db[b]||[]).length, icon: brandIcon(b), cls: BRAND_COLORS[b] || '' }))
+  ].map(s => `
+    <div class="stat-card ${s.cls}" onclick="switchTab('${s.key}')">
+      <div class="stat-icon">${s.icon}</div>
+      <div class="stat-brand">${s.label}</div>
+      <div class="stat-num">${s.count}</div>
+      <div class="stat-label">veículos</div>
+    </div>
+  `).join('');
+  row.innerHTML = html;
+}
+
+function brandIcon(b) {
+  return { TOYOTA: '🚙', VW: '🚗', GM: '🛻', HYUNDAI: '🚘', BYD: '⚡' }[b] || '🚗';
+}
+
+function renderTabs() {
+  const row = document.getElementById('tabs-row');
+  row.innerHTML = BRANDS.map(b => `
+    <button class="tab-btn ${b === 'ALL' ? '' : BRAND_COLORS[b]} ${b === currentTab ? 'active' : ''}"
+      onclick="switchTab('${b}')">
+      ${BRAND_LABELS[b]}
+    </button>
+  `).join('');
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  currentPage = 1;
+  renderTabs();
+  const brandCol = document.getElementById('brand-col-head');
+  brandCol.style.display = tab === 'ALL' ? '' : 'none';
+  updateModelFilter();
+  applyFilters();
+  document.getElementById('panel-title').textContent = 
+    (tab === 'ALL' ? 'GERAL — TODOS OS VEÍCULOS' : `${BRAND_LABELS[tab]} — VEÍCULOS`).toUpperCase();
+  renderAllCharts();
+}
+
+function updateModelFilter() {
+  const rows = getCurrentRows();
+  const models = [...new Set(rows.map(r => r.Modelo))].sort();
+  const sel = document.getElementById('model-filter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Todos os modelos</option>' + models.map(m => `<option value="${m}" ${m===cur?'selected':''}>${m}</option>`).join('');
+}
+
+function applyFilters() {
+  const q = document.getElementById('search-input').value.toLowerCase().trim();
+  const modelF = document.getElementById('model-filter').value;
+  const sort = document.getElementById('sort-select').value;
+const dataInicio = document.getElementById("filtroDataInicio")?.value;
+const dataFim = document.getElementById("filtroDataFim")?.value;
+  let rows = getCurrentRows();
+  if (q) {
+    rows = rows.filter(r =>
+      r.Chassi.toLowerCase().includes(q) ||
+      r.Modelo.toLowerCase().includes(q) ||
+      (r.Data || '').includes(q)
+    );
+  }
+  if (modelF) rows = rows.filter(r => r.Modelo === modelF);
+if(dataInicio){
+    rows = rows.filter(r => (r.Data || '') >= dataInicio);
+}
+
+if(dataFim){
+    rows = rows.filter(r => (r.Data || '') <= dataFim);
+}
+  rows.sort((a, b) => {
+    if (sort === 'date-desc') return (b.Data||'').localeCompare(a.Data||'');
+    if (sort === 'date-asc') return (a.Data||'').localeCompare(b.Data||'');
+    if (sort === 'model-asc') return a.Modelo.localeCompare(b.Modelo);
+    if (sort === 'chassi-asc') return a.Chassi.localeCompare(b.Chassi);
+    return 0;
+  });
+  filteredData = rows;
+  currentPage = 1;
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('table-body');
+  const total = filteredData.length;
+  document.getElementById('panel-count').textContent = `${total} registro${total !== 1 ? 's' : ''}`;
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageRows = filteredData.slice(start, start + PAGE_SIZE);
+  const showBrand = currentTab === 'ALL';
+  
+  if (pageRows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="no-results">Nenhum resultado encontrado</td></tr>`;
+  } else {
+    tbody.innerHTML = pageRows.map((r, i) => {
+      const brandCls = BRAND_COLORS[r.brand] || '';
+      const brandCell = showBrand
+        ? `<td><span class="brand-badge brand-${brandCls}">${r.brand}</span></td>`
+        : '<td style="display:none"></td>';
+      const dateFmt = r.Data ? r.Data.split('T')[0] : '—';
+      return `<tr>
+        <td style="color:var(--white-muted);font-size:12px">${start + i + 1}</td>
+        <td><span class="chassi-badge">${r.Chassi}</span></td>
+        <td>${r.Modelo}</td>
+        ${brandCell}
+        <td class="date-cell">${dateFmt}</td>
+        <td><button class="row-del" onclick="promptDelete(${r.id}, '${r.brand}', '${r.Chassi}', '${r.Modelo}', '${dateFmt}')" title="Remover">✕</button></td>
+      </tr>`;
+    }).join('');
+  }
+  renderPagination(total);
+}
+
+function renderPagination(total) {
+  const pages = Math.ceil(total / PAGE_SIZE);
+  const pag = document.getElementById('pagination');
+  if (pages <= 1) { pag.innerHTML = ''; return; }
+  let html = `<span class="page-info">Página ${currentPage} de ${pages}</span>`;
+  html += `<button class="page-btn" ${currentPage===1?'disabled':''} onclick="goPage(${currentPage-1})">‹ Ant</button>`;
+  for (let p = Math.max(1, currentPage-2); p <= Math.min(pages, currentPage+2); p++) {
+    html += `<button class="page-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+  }
+  html += `<button class="page-btn" ${currentPage===pages?'disabled':''} onclick="goPage(${currentPage+1})">Próx ›</button>`;
+  pag.innerHTML = html;
+}
+
+function goPage(p) { currentPage = p; renderTable(); }
+
+// =========== ADD ===========
+function openAddModal() {
+  document.getElementById('add-chassi').value = '';
+  document.getElementById('add-modelo').value = '';
+  document.getElementById('add-data').value = new Date().toISOString().split('T')[0];
+  openModal('add-modal');
+}
+
+function saveVehicle() {
+  const brand = document.getElementById('add-brand').value;
+  const chassi = document.getElementById('add-chassi').value.trim().toUpperCase();
+  const modelo = document.getElementById('add-modelo').value.trim();
+  const data = document.getElementById('add-data').value;
+  if (!chassi || !modelo || !data) { showToast('Preencha todos os campos!', 'error'); return; }
+  if (!db[brand]) db[brand] = [];
+  db[brand].push({ Chassi: chassi, Modelo: modelo, Data: data, id: nextId++ });
+  closeModal('add-modal');
+  renderStats();
+  updateModelFilter();
+  applyFilters();
+  renderAllCharts();
+  showToast(`Veículo ${chassi} adicionado com sucesso!`, 'success');
+}
+
+// =========== DELETE ===========
+function promptDelete(id, brand, chassi, modelo, data) {
+  pendingDelete = { id, brand };
+  document.getElementById('del-preview').innerHTML = `
+    <strong>Chassi:</strong> ${chassi}<br>
+    <strong>Modelo:</strong> ${modelo}<br>
+    <strong>Montadora:</strong> ${brand}<br>
+    <strong>Data OUT:</strong> ${data}
+  `;
+  openModal('del-modal');
+}
+
+function confirmDelete() {
+  if (!pendingDelete) return;
+  const { id, brand } = pendingDelete;
+  db[brand] = (db[brand] || []).filter(r => r.id !== id);
+  closeModal('del-modal');
+  renderStats();
+  updateModelFilter();
+  applyFilters();
+  renderAllCharts();
+  showToast('Veículo removido.', 'success');
+  pendingDelete = null;
+}
+
+// =========== IMPORT ===========
+function openImportModal() {
+  pendingImport = null;
+  document.getElementById('import-status').textContent = '';
+  document.getElementById('import-preview').style.display = 'none';
+  document.getElementById('file-input').value = '';
+  openModal('import-modal');
+}
+
+function handleFileSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  document.getElementById('import-status').textContent = `📂 Lendo: ${file.name}...`;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      let rows = [];
+      if (ext === 'csv') {
+        const text = e.target.result;
+        const lines = text.split('\n').filter(l => l.trim());
+        const header = lines[0].split(',').map(h => h.trim().replace(/"/g,''));
+        const ci = header.findIndex(h => /chassi/i.test(h));
+        const mi = header.findIndex(h => /modelo/i.test(h));
+        const di = header.findIndex(h => /data/i.test(h));
+        for (let i = 1; i < lines.length; i++) {
+          const cols = lines[i].split(',').map(c => c.trim().replace(/"/g,''));
+          if (ci >= 0 && mi >= 0) rows.push({ Chassi: cols[ci]||'', Modelo: cols[mi]||'', Data: di>=0?cols[di]?.split('T')[0]||'':'' });
+        }
+      } else {
+        const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const raw = XLSX.utils.sheet_to_json(ws, { raw: false, dateNF: 'yyyy-mm-dd' });
+        rows = raw.map(r => {
+          const chassi = r['Chassi'] || r['chassi'] || r['CHASSI'] || '';
+          const modelo = r['Modelo'] || r['modelo'] || r['MODELO'] || '';
+          let data = r['Data'] || r['Data/Hora'] || r['data'] || r['DATA'] || '';
+          if (data && typeof data === 'string') data = data.split('T')[0].split(' ')[0];
+          return { Chassi: String(chassi).trim(), Modelo: String(modelo).trim(), Data: data };
+        }).filter(r => r.Chassi && r.Modelo);
+      }
+      
+      pendingImport = rows;
+      const preview = rows.slice(0, 5);
+      document.getElementById('import-preview').style.display = 'block';
+      document.getElementById('import-preview').innerHTML = `
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:12px;font-size:12px;">
+          <div style="font-weight:600;margin-bottom:8px;color:var(--accent)">✅ ${rows.length} registros detectados — prévia:</div>
+          ${preview.map(r => `<div style="margin-bottom:4px;opacity:0.8">${r.Chassi} | ${r.Modelo} | ${r.Data}</div>`).join('')}
+          ${rows.length > 5 ? `<div style="opacity:0.5">... e mais ${rows.length-5} registros</div>` : ''}
+        </div>
+      `;
+      document.getElementById('import-status').textContent = '';
+    } catch(err) {
+      document.getElementById('import-status').textContent = '❌ Erro ao ler arquivo: ' + err.message;
+      pendingImport = null;
+    }
+  };
+  if (ext === 'csv') reader.readAsText(file);
+  else reader.readAsArrayBuffer(file);
+}
+
+function confirmImport() {
+  if (!pendingImport || pendingImport.length === 0) { showToast('Nenhum dado para importar.', 'error'); return; }
+  const brand = document.getElementById('import-brand').value;
+  if (!db[brand]) db[brand] = [];
+  let added = 0;
+  pendingImport.forEach(r => {
+    if (r.Chassi) { db[brand].push({ ...r, id: nextId++ }); added++; }
+  });
+  closeModal('import-modal');
+  renderStats();
+  updateModelFilter();
+  applyFilters();
+  renderAllCharts();
+  showToast(`${added} veículos importados para ${brand}!`, 'success');
+  pendingImport = null;
+}
+
+// =========== EXPORT ===========
+function exportCSV() {
+  const rows = filteredData.length ? filteredData : getAllRows();
+  const header = 'Montadora,Chassi,Modelo,Data OUT\n';
+  const body = rows.map(r => `${r.brand||currentTab},${r.Chassi},${r.Modelo},${r.Data||''}`).join('\n');
+  const blob = new Blob([header + body], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `OUT_OFICINA_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  showToast('CSV exportado com sucesso!', 'success');
+}
+
+// =========== MODAL HELPERS ===========
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+// =========== CHARTS ===========
+const BRAND_COLORS_HEX = {
+  TOYOTA: '#e74c3c', VW: '#3498db', GM: '#f39c12', HYUNDAI: '#9b59b6', BYD: '#1abc9c'
+};
+const chartInstances = {};
+
+function destroyChart(id) {
+  if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+}
+
+const CHART_DEFAULTS = {
+  plugins: { legend: { labels: { color: 'rgba(255,255,255,0.7)', font: { family: 'Barlow', size: 12 } } } },
+  scales: {}
+};
+function axisStyle() {
+  return {
+    ticks: { color: 'rgba(255,255,255,0.5)', font: { family: 'Barlow', size: 11 } },
+    grid: { color: 'rgba(255,255,255,0.06)' },
+    border: { color: 'rgba(255,255,255,0.08)' }
+  };
+}
+
+function renderAllCharts() {
+  renderDonut();
+  renderBarBrands();
+  renderTopModels();
+  renderTimeline();
+  renderWeekday();
+}
+
+function renderDonut() {
+  destroyChart('chart-donut');
+  const brands = Object.keys(BRAND_COLORS_HEX);
+  const data = brands.map(b => (db[b]||[]).length);
+  const ctx = document.getElementById('chart-donut').getContext('2d');
+  chartInstances['chart-donut'] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: brands.map(b => BRAND_LABELS[b]),
+      datasets: [{ data, backgroundColor: brands.map(b => BRAND_COLORS_HEX[b]), borderColor: 'rgba(0,0,0,0.3)', borderWidth: 2, hoverOffset: 8 }]
+    },
+    options: {
+      responsive: true, cutout: '62%',
+      plugins: {
+        legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.7)', font: { family: 'Barlow', size: 12 }, padding: 14, boxWidth: 12 } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} veículos (${Math.round(ctx.parsed/ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0)*100)}%)` } }
+      }
+    }
+  });
+}
+
+function renderBarBrands() {
+  destroyChart('chart-bar-brands');
+  const brands = Object.keys(BRAND_COLORS_HEX);
+  const data = brands.map(b => (db[b]||[]).length);
+  const ctx = document.getElementById('chart-bar-brands').getContext('2d');
+  chartInstances['chart-bar-brands'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: brands.map(b => BRAND_LABELS[b]),
+      datasets: [{
+        label: 'Veículos',
+        data,
+        backgroundColor: brands.map(b => BRAND_COLORS_HEX[b] + 'cc'),
+        borderColor: brands.map(b => BRAND_COLORS_HEX[b]),
+        borderWidth: 1, borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: { x: axisStyle(), y: { ...axisStyle(), ticks: { color: 'rgba(255,255,255,0.7)', font: { family: 'Barlow Condensed', size: 13, weight: '700' } } } }
+    }
+  });
+}
+
+function renderTopModels() {
+  destroyChart('chart-top-models');
+  const rows = currentTab === 'ALL' ? getAllRows() : getCurrentRows();
+  const counts = {};
+  rows.forEach(r => { counts[r.Modelo] = (counts[r.Modelo]||0) + 1; });
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const palette = ['#4a9eed','#e74c3c','#f39c12','#1abc9c','#9b59b6','#3498db'];
+  const ctx = document.getElementById('chart-top-models').getContext('2d');
+  chartInstances['chart-top-models'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(([m]) => m.length > 18 ? m.slice(0,17)+'…' : m),
+      datasets: [{ label: 'Veículos', data: sorted.map(([,c])=>c), backgroundColor: palette.map(c=>c+'cc'), borderColor: palette, borderWidth: 1, borderRadius: 6 }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { x: { ...axisStyle(), ticks: { ...axisStyle().ticks, maxRotation: 35, font: { family: 'Barlow', size: 10 } } }, y: axisStyle() }
+    }
+  });
+}
+
+function renderTimeline() {
+  destroyChart('chart-timeline');
+  const rows = currentTab === 'ALL' ? getAllRows() : getCurrentRows();
+  // Group by month per brand
+  const monthSet = new Set();
+  const brandMonthData = {};
+  const brands = currentTab === 'ALL' ? Object.keys(BRAND_COLORS_HEX) : [currentTab];
+  brands.forEach(b => brandMonthData[b] = {});
+  rows.forEach(r => {
+    if (!r.Data) return;
+    const m = r.Data.slice(0,7);
+    monthSet.add(m);
+    const b = r.brand || currentTab;
+    if (!brandMonthData[b]) brandMonthData[b] = {};
+    brandMonthData[b][m] = (brandMonthData[b][m]||0) + 1;
+  });
+  const months = [...monthSet].sort();
+  const datasets = brands.map(b => ({
+    label: BRAND_LABELS[b],
+    data: months.map(m => brandMonthData[b]?.[m] || 0),
+    borderColor: BRAND_COLORS_HEX[b] || '#4a9eed',
+    backgroundColor: (BRAND_COLORS_HEX[b] || '#4a9eed') + '22',
+    fill: brands.length === 1,
+    tension: 0.4, pointRadius: 4, pointHoverRadius: 7, borderWidth: 2
+  }));
+  const ctx = document.getElementById('chart-timeline').getContext('2d');
+  chartInstances['chart-timeline'] = new Chart(ctx, {
+    type: 'line',
+    data: { labels: months.map(m => { const [y,mo]=m.split('-'); return ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][+mo-1]+' '+y.slice(2); }), datasets },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'top', labels: { color: 'rgba(255,255,255,0.7)', font: { family: 'Barlow', size: 12 }, boxWidth: 14, padding: 16 } } },
+      scales: { x: { ...axisStyle(), ticks: { ...axisStyle().ticks, maxRotation: 45 } }, y: axisStyle() },
+      interaction: { mode: 'index', intersect: false }
+    }
+  });
+}
+
+function renderWeekday() {
+  destroyChart('chart-weekday');
+  const rows = currentTab === 'ALL' ? getAllRows() : getCurrentRows();
+  const days = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const counts = [0,0,0,0,0,0,0];
+  rows.forEach(r => {
+    if (!r.Data) return;
+    const d = new Date(r.Data + 'T12:00:00');
+    if (!isNaN(d)) counts[d.getDay()]++;
+  });
+  const max = Math.max(...counts);
+  const ctx = document.getElementById('chart-weekday').getContext('2d');
+  chartInstances['chart-weekday'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: days,
+      datasets: [{
+        label: 'OUT',
+        data: counts,
+        backgroundColor: counts.map(c => `rgba(74,158,237,${0.3 + 0.7*(c/max)})`),
+        borderColor: '#4a9eed',
+        borderWidth: 1, borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { x: axisStyle(), y: axisStyle() }
+    }
+  });
+}
+
+// =========== TOAST ===========
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+// =========== DRAG DROP UPLOAD ===========
+const uploadZone = document.getElementById('upload-zone');
+if (uploadZone) {
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault(); uploadZone.classList.remove('drag');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      document.getElementById('file-input').files = dt.files;
+      handleFileSelect(document.getElementById('file-input'));
+    }
+  });
+}
+
+// =========== INIT ===========
+document.getElementById('header-date').textContent = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+initDB();
+renderStats();
+renderTabs();
+document.getElementById('brand-col-head').style.display = '';
+updateModelFilter();
+applyFilters();
+setTimeout(renderAllCharts, 100);
+</script>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = "https://rlmqxmrgwvjvufnsmwyp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_BJnBCEwXsFdIlNfow85hUA_7GuRSYUJ";
+
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+window.onload = async () => {
+
+    const { data } = await supabaseClient.auth.getSession();
+
+    if(data.session){
+
+        document.getElementById("app").style.display = "block";
+        document.getElementById("loginBox").style.display = "none";
+
+        carregarDados();
+
+    }else{
+
+        document.getElementById("app").style.display = "none";
+        document.getElementById("loginBox").style.display = "block";
+
+    }
+
+}
+
+// LOGIN
+async function login(email, senha){
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: senha
+    });
+
+    if(error){
+        alert("Erro login: " + error.message);
+        return;
+    }
+
+    alert("Login realizado!");
+
+document.getElementById("app").style.display = "block";
+document.getElementById("loginBox").style.display = "none";
+
+    carregarDados();
+}
+
+async function logout(){
+
+    await supabaseClient.auth.signOut();
+
+    document.getElementById("app").style.display = "none";
+    document.getElementById("loginBox").style.display = "block";
+
+}
+
+// BUSCAR DADOS
+async function carregarDados(){
+
+    let query = supabaseClient
+    .from('saidas_veiculos')
+    .select('*')
+    .order('id', { ascending:false });
+
+const dataInicio = document.getElementById("filtroDataInicio")?.value;
+const dataFim = document.getElementById("filtroDataFim")?.value;
+
+if(dataInicio){
+    query = query.gte("data_saida", dataInicio);
+}
+
+if(dataFim){
+    query = query.lte("data_saida", dataFim);
+}
+
+const { data, error } = await query;
+
+    console.log(data);
+
+    if(error){
+        console.log(error);
+        return;
+    }
+
+let dadosFiltrados = data;
+
+if(dataInicio){
+    dadosFiltrados = dadosFiltrados.filter(item => item.data_saida >= dataInicio);
+}
+
+if(dataFim){
+    dadosFiltrados = dadosFiltrados.filter(item => item.data_saida <= dataFim);
+}
+
+    const tbody = document.getElementById("tbody");
+
+    tbody.innerHTML = "";
+
+    dadosFiltrados.forEach(item => {
+
+        tbody.innerHTML += `
+            <tr>
+                <td>${item.data_saida || ''}</td>
+                <td>${item.montadora || ''}</td>
+                <td>${item.transportadora || ''}</td>
+                <td>${item.modelo || ''}</td>
+                <td>${item.chassi || ''}</td>
+            </tr>
+        `;
+
+    });
+
+}
+
+// ADICIONAR REGISTRO
+async function adicionarRegistro(){
+
+    const data_saida = document.getElementById("data_saida").value;
+    const montadora = document.getElementById("montadora").value;
+    const transportadora = document.getElementById("transportadora").value;
+    const modelo = document.getElementById("modelo").value;
+    const chassi = document.getElementById("chassi").value;
+
+    const { error } = await supabaseClient
+        .from('saidas_veiculos')
+        .insert([{
+            data_saida,
+            montadora,
+            transportadora,
+            modelo,
+            chassi
+        }]);
+
+    if(error){
+        alert(error.message);
+        return;
+    }
+
+    alert("Registro salvo!");
+
+    carregarDados();
+}
+
+// TEMPO REAL
+supabaseClient
+.channel('tempo-real')
+.on(
+    'postgres_changes',
+    {
+        event: '*',
+        schema: 'public',
+        table: 'saidas_veiculos'
+    },
+    payload => {
+
+        console.log(payload);
+
+        carregarDados();
+
+    }
+)
+.subscribe();
+
+</script>
+
+<div id="loginBox" style="max-width:360px;margin:80px auto;padding:25px;background:white;border-radius:12px;color:#162033;">
+  <h2>Login - Dashboard</h2>
+
+  <input id="email" type="email" placeholder="E-mail" style="width:100%;padding:12px;margin:8px 0;">
+  <input id="senha" type="password" placeholder="Senha" style="width:100%;padding:12px;margin:8px 0;">
+
+  <button onclick="login(
+    document.getElementById('email').value,
+    document.getElementById('senha').value
+  )" style="width:100%;padding:12px;margin-top:10px;">
+    Entrar
+  </button>
+</div>
+
+</body>
+</html>
