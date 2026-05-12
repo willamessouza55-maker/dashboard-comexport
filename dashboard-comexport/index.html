@@ -434,7 +434,55 @@ Sair
     <button class="action-btn" onclick="openImportModal()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       Importar Excel
-    </button>
+</button>
+
+<div style="
+display:flex;
+gap:10px;
+align-items:center;
+flex-wrap:wrap;
+margin-top:25px;
+width:100%;
+">
+<input type="date" id="filtroDataInicio" style="
+padding:10px;
+border-radius:8px;
+border:none;
+">
+
+<input type="date" id="filtroDataFim" style="
+padding:10px;
+border-radius:8px;
+border:none;
+">
+
+<button onclick="applyFilters()" style="
+padding:10px 18px;
+border-radius:8px;
+border:none;
+cursor:pointer;
+font-weight:bold;
+">
+Filtrar Data
+</button>
+
+<button onclick="
+document.getElementById('filtroDataInicio').value='';
+document.getElementById('filtroDataFim').value='';
+applyFilters();
+" style="
+padding:10px 18px;
+border-radius:8px;
+border:none;
+cursor:pointer;
+font-weight:bold;
+background:#ff4d4f;
+color:white;
+">
+Limpar
+</button>
+
+</div>
     <button class="action-btn" onclick="exportCSV()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Exportar CSV
@@ -650,6 +698,8 @@ function applyFilters() {
   const q = document.getElementById('search-input').value.toLowerCase().trim();
   const modelF = document.getElementById('model-filter').value;
   const sort = document.getElementById('sort-select').value;
+const dataInicio = document.getElementById("filtroDataInicio")?.value;
+const dataFim = document.getElementById("filtroDataFim")?.value;
   let rows = getCurrentRows();
   if (q) {
     rows = rows.filter(r =>
@@ -659,6 +709,13 @@ function applyFilters() {
     );
   }
   if (modelF) rows = rows.filter(r => r.Modelo === modelF);
+if(dataInicio){
+    rows = rows.filter(r => (r.Data || '') >= dataInicio);
+}
+
+if(dataFim){
+    rows = rows.filter(r => (r.Data || '') <= dataFim);
+}
   rows.sort((a, b) => {
     if (sort === 'date-desc') return (b.Data||'').localeCompare(a.Data||'');
     if (sort === 'date-asc') return (a.Data||'').localeCompare(b.Data||'');
@@ -1135,10 +1192,23 @@ async function logout(){
 // BUSCAR DADOS
 async function carregarDados(){
 
-    const { data, error } = await supabaseClient
-        .from('saidas_veiculos')
-        .select('*')
-        .order('id', { ascending:false });
+    let query = supabaseClient
+    .from('saidas_veiculos')
+    .select('*')
+    .order('id', { ascending:false });
+
+const dataInicio = document.getElementById("filtroDataInicio")?.value;
+const dataFim = document.getElementById("filtroDataFim")?.value;
+
+if(dataInicio){
+    query = query.gte("data_saida", dataInicio);
+}
+
+if(dataFim){
+    query = query.lte("data_saida", dataFim);
+}
+
+const { data, error } = await query;
 
     console.log(data);
 
@@ -1147,11 +1217,21 @@ async function carregarDados(){
         return;
     }
 
+let dadosFiltrados = data;
+
+if(dataInicio){
+    dadosFiltrados = dadosFiltrados.filter(item => item.data_saida >= dataInicio);
+}
+
+if(dataFim){
+    dadosFiltrados = dadosFiltrados.filter(item => item.data_saida <= dataFim);
+}
+
     const tbody = document.getElementById("tbody");
 
     tbody.innerHTML = "";
 
-    data.forEach(item => {
+    dadosFiltrados.forEach(item => {
 
         tbody.innerHTML += `
             <tr>
